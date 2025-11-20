@@ -1,7 +1,6 @@
 package widget
 
 import (
-	"image/color"
 	"testing"
 
 	"fyne.io/fyne/v2"
@@ -18,16 +17,15 @@ func TestRotatingKnobRenderer_Objects(t *testing.T) {
 
 	objects := renderer.Objects()
 
-	// Should have at least: bgArc, track, active, indicator, thumb, centerDot
-	assert.GreaterOrEqual(t, len(objects), 6)
+	// Should have at least: track, active, indicator, thumb, centerDot
+	assert.GreaterOrEqual(t, len(objects), 5)
 
 	// Check object types
-	assert.IsType(t, &canvas.Arc{}, objects[0])    // bgArc
-	assert.IsType(t, &canvas.Circle{}, objects[1]) // track
-	assert.IsType(t, &canvas.Circle{}, objects[2]) // active
-	assert.IsType(t, &canvas.Line{}, objects[3])   // indicator
-	assert.IsType(t, &canvas.Circle{}, objects[4]) // thumb
-	assert.IsType(t, &canvas.Circle{}, objects[5]) // centerDot
+	assert.IsType(t, &canvas.Arc{}, objects[0])    // track
+	assert.IsType(t, &canvas.Arc{}, objects[1])    // active
+	assert.IsType(t, &canvas.Line{}, objects[2])   // indicator
+	assert.IsType(t, &canvas.Circle{}, objects[3]) // thumb
+	assert.IsType(t, &canvas.Circle{}, objects[4]) // centerDot
 }
 
 func TestRotatingKnobRenderer_ObjectsWithTicks(t *testing.T) {
@@ -38,11 +36,11 @@ func TestRotatingKnobRenderer_ObjectsWithTicks(t *testing.T) {
 	renderer := test.TempWidgetRenderer(t, knob).(*rotatingKnobRenderer)
 	objects := renderer.Objects()
 
-	// Should have 6 base objects + 5 tick marks
-	assert.Equal(t, 11, len(objects))
+	// Should have 5 base objects + 5 tick marks
+	assert.Equal(t, 10, len(objects))
 
 	// Last 5 objects should be tick lines
-	for i := 6; i < 11; i++ {
+	for i := 5; i < 10; i++ {
 		assert.IsType(t, &canvas.Line{}, objects[i])
 	}
 }
@@ -54,8 +52,8 @@ func TestRotatingKnobRenderer_ObjectsWithoutTicks(t *testing.T) {
 	renderer := test.TempWidgetRenderer(t, knob).(*rotatingKnobRenderer)
 	objects := renderer.Objects()
 
-	// Should have only 6 base objects
-	assert.Equal(t, 6, len(objects))
+	// Should have only 5 base objects
+	assert.Equal(t, 5, len(objects))
 }
 
 func TestRotatingKnobRenderer_Layout(t *testing.T) {
@@ -64,10 +62,6 @@ func TestRotatingKnobRenderer_Layout(t *testing.T) {
 
 	size := fyne.NewSize(100, 100)
 	renderer.Layout(size)
-
-	// Background arc should be full size
-	assert.Equal(t, float32(100), renderer.bgArc.Size().Width)
-	assert.Equal(t, float32(100), renderer.bgArc.Size().Height)
 
 	// Track should be slightly smaller
 	assert.Less(t, renderer.track.Size().Width, float32(100))
@@ -83,9 +77,9 @@ func TestRotatingKnobRenderer_MinSize(t *testing.T) {
 
 	minSize := renderer.MinSize()
 
-	// Minimum size should be at least 80x80
-	assert.GreaterOrEqual(t, minSize.Width, float32(80))
-	assert.GreaterOrEqual(t, minSize.Height, float32(80))
+	// Minimum size should be at least 60x60
+	assert.GreaterOrEqual(t, minSize.Width, float32(60))
+	assert.GreaterOrEqual(t, minSize.Height, float32(60))
 }
 
 func TestRotatingKnobRenderer_Refresh(t *testing.T) {
@@ -94,7 +88,6 @@ func TestRotatingKnobRenderer_Refresh(t *testing.T) {
 
 	// Initial state
 	renderer.Refresh()
-	assert.NotNil(t, renderer.bgArc.FillColor)
 	assert.NotNil(t, renderer.indicator.StrokeColor)
 }
 
@@ -279,12 +272,8 @@ func TestRotatingKnob_ColorConsistency(t *testing.T) {
 	// Check colors are set properly
 	renderer.Refresh()
 
-	// Background should have some transparency
-	bgColor := renderer.bgArc.FillColor
-	assert.IsType(t, color.NRGBA{}, bgColor)
-
 	// Track should be disabled color
-	assert.Equal(t, theme.DisabledColor(), renderer.track.FillColor)
+	assert.Equal(t, theme.DisabledColor(), renderer.track.StrokeColor)
 
 	// Active should be primary color
 	assert.Equal(t, theme.PrimaryColor(), renderer.active.StrokeColor)
@@ -302,9 +291,9 @@ func TestRotatingKnob_RectangularSize(t *testing.T) {
 	renderer.Layout(size)
 
 	// Should use the smaller dimension for diameter
-	expectedDiameter := float32(80)
-	assert.Equal(t, expectedDiameter, renderer.bgArc.Size().Width)
-	assert.Equal(t, expectedDiameter, renderer.bgArc.Size().Height)
+	expectedDiameter := float32(80) * 0.85
+	assert.Equal(t, expectedDiameter, renderer.track.Size().Width)
+	assert.Equal(t, expectedDiameter, renderer.track.Size().Height)
 }
 
 func TestRotatingKnob_ExtendedRange(t *testing.T) {

@@ -1,11 +1,13 @@
 package widget_test
 
 import (
+	"image/color"
 	"testing"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/test"
+	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
 	"github.com/stretchr/testify/assert"
@@ -369,4 +371,22 @@ func TestRotatingKnob_MouseHover(t *testing.T) {
 
 	// Simulate mouse exit
 	knob.MouseOut()
+}
+
+func TestRotatingKnob_Visual(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+	test.ApplyTheme(t, theme.LightTheme())
+
+	knob := widget.NewRotatingKnob(0, 11)
+	knob.StartAngle = -120
+	knob.EndAngle = 120
+	knob.SetValue(8)
+	knob.WedgeColor = color.Transparent
+
+	w := test.NewWindow(knob)
+	defer w.Close()
+	w.Resize(fyne.NewSize(100, 100))
+
+	test.AssertImageMatches(t, "rotating_knob/visual_volume.png", w.Canvas().Capture())
 }
