@@ -198,8 +198,8 @@ func (k *RotatingKnob) MinSize() fyne.Size {
 func (k *RotatingKnob) CreateRenderer() fyne.WidgetRenderer {
 	k.ExtendBaseWidget(k)
 
-	// Background circle
-	bg := canvas.NewCircle(theme.ShadowColor())
+	// Background arc - only covers the active range (not full circle)
+	bgArc := canvas.NewArc(float32(k.StartAngle), float32(k.EndAngle), 0.0, theme.ShadowColor())
 
 	// Wedge backdrop (filled arc showing current value range)
 	var wedge *canvas.Arc
@@ -223,7 +223,7 @@ func (k *RotatingKnob) CreateRenderer() fyne.WidgetRenderer {
 	// Center dot
 	centerDot := canvas.NewCircle(theme.BackgroundColor())
 
-	objects := []fyne.CanvasObject{bg}
+	objects := []fyne.CanvasObject{bgArc}
 	if wedge != nil {
 		objects = append(objects, wedge)
 	}
@@ -242,7 +242,7 @@ func (k *RotatingKnob) CreateRenderer() fyne.WidgetRenderer {
 
 	r := &rotatingKnobRenderer{
 		knob:      k,
-		bg:        bg,
+		bgArc:     bgArc,
 		wedge:     wedge,
 		track:     track,
 		active:    active,
@@ -474,7 +474,7 @@ func (k *RotatingKnob) updateValueFromAngle(angle float64) {
 // rotatingKnobRenderer is the renderer for RotatingKnob
 type rotatingKnobRenderer struct {
 	knob      *RotatingKnob
-	bg        *canvas.Circle
+	bgArc     *canvas.Arc
 	wedge     *canvas.Arc
 	track     *canvas.Circle
 	active    *canvas.Circle
@@ -487,13 +487,12 @@ type rotatingKnobRenderer struct {
 
 func (r *rotatingKnobRenderer) Layout(size fyne.Size) {
 	diameter := fyne.Min(size.Width, size.Height)
-	radius := diameter / 2
 	centerX := size.Width / 2
 	centerY := size.Height / 2
 
-	// Background - full size
-	r.bg.Resize(fyne.NewSize(diameter, diameter))
-	r.bg.Move(fyne.NewPos(centerX-radius, centerY-radius))
+	// Background arc - only covers the active range
+	r.bgArc.Resize(fyne.NewSize(diameter, diameter))
+	r.bgArc.Move(fyne.NewPos(centerX, centerY))
 
 	// Calculate current angle for wedge
 	ratio := (r.knob.Value - r.knob.Min) / (r.knob.Max - r.knob.Min)
@@ -577,7 +576,7 @@ func (r *rotatingKnobRenderer) MinSize() fyne.Size {
 func (r *rotatingKnobRenderer) Refresh() {
 	// Update colors based on state
 	if r.knob.Disabled() {
-		r.bg.FillColor = theme.DisabledColor()
+		r.bgArc.FillColor = theme.DisabledColor()
 		r.track.FillColor = theme.DisabledColor()
 		r.active.FillColor = theme.DisabledColor()
 		r.indicator.StrokeColor = theme.DisabledColor()
@@ -587,7 +586,7 @@ func (r *rotatingKnobRenderer) Refresh() {
 			tick.StrokeColor = theme.DisabledColor()
 		}
 	} else {
-		r.bg.FillColor = color.NRGBA{R: 0, G: 0, B: 0, A: 20}
+		r.bgArc.FillColor = color.NRGBA{R: 0, G: 0, B: 0, A: 20}
 
 		// Wedge backdrop
 		if r.wedge != nil && r.knob.WedgeColor != nil {
