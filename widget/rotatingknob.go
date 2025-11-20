@@ -61,6 +61,11 @@ type RotatingKnob struct {
 	// TickCount is the number of tick marks to show (if ShowTicks is true)
 	TickCount int
 
+	// AccentColor is the color used for the active arc and thumb (nil uses theme color)
+	AccentColor color.Color
+	// TrackColor is the color used for the background track (nil uses theme color)
+	TrackColor color.Color
+
 	// OnChanged is called when the value changes (during dragging)
 	OnChanged func(float64)
 	// OnChangeEnded is called when a value change ends (drag end, key release)
@@ -559,15 +564,23 @@ func (r *rotatingKnobRenderer) Refresh() {
 
 		// Track shows the full range (subtle)
 		trackColor := theme.DisabledColor()
+		if r.knob.TrackColor != nil {
+			trackColor = r.knob.TrackColor
+		}
 		r.track.FillColor = trackColor
 		r.track.StrokeColor = trackColor
 		r.track.StrokeWidth = 8
 
 		// Active shows current position (prominent)
 		activeColor := theme.PrimaryColor()
+		if r.knob.AccentColor != nil {
+			activeColor = r.knob.AccentColor
+		}
 		if r.knob.hovered {
-			// Brighten on hover
-			activeColor = theme.HoverColor()
+			// Brighten on hover (blend with hover color if using custom color)
+			if r.knob.AccentColor == nil {
+				activeColor = theme.HoverColor()
+			}
 		}
 		r.active.FillColor = color.Transparent
 		r.active.StrokeColor = activeColor

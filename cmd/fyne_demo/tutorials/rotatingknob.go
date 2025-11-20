@@ -13,166 +13,291 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-// RotatingKnobScreen demonstrates the rotating knob widget with various configurations
-func RotatingKnobScreen(_ fyne.Window) fyne.CanvasObject {
-	// Basic knob example
-	basicKnob := widget.NewRotatingKnob(0, 100)
-	basicKnob.SetValue(50)
-	basicValueLabel := widget.NewLabel("Value: 50.0")
-	basicKnob.OnChanged = func(value float64) {
-		basicValueLabel.SetText(fmt.Sprintf("Value: %.1f", value))
+// makeKnobWithIcon creates a knob with an icon and value display
+func makeKnobWithIcon(knob *widget.RotatingKnob, icon string, valueLabel *widget.Label, accentColor color.Color) fyne.CanvasObject {
+	// Apply custom color if provided
+	if accentColor != nil {
+		knob.AccentColor = accentColor
 	}
 
-	basicCard := widget.NewCard("Basic Knob", "Standard 0-100 range",
-		container.NewVBox(
-			container.NewCenter(basicKnob),
-			basicValueLabel,
-		))
+	// Create icon text
+	iconText := canvas.NewText(icon, theme.ForegroundColor())
+	iconText.TextSize = 32
+	iconText.Alignment = fyne.TextAlignCenter
 
-	// Temperature control knob
+	// Style the value label
+	valueLabel.TextStyle = fyne.TextStyle{Bold: true}
+	valueLabel.Alignment = fyne.TextAlignCenter
+
+	// Create a visual container with icon above, knob in center, value below
+	return container.NewVBox(
+		container.NewCenter(iconText),
+		layout.NewSpacer(),
+		container.NewCenter(knob),
+		layout.NewSpacer(),
+		container.NewCenter(valueLabel),
+	)
+}
+
+// RotatingKnobScreen demonstrates the rotating knob widget with various configurations
+func RotatingKnobScreen(_ fyne.Window) fyne.CanvasObject {
+	// 1. BASIC KNOB - Simple percentage control
+	basicKnob := widget.NewRotatingKnob(0, 100)
+	basicKnob.SetValue(50)
+	basicKnob.AccentColor = color.NRGBA{R: 100, G: 149, B: 237, A: 255} // Cornflower blue
+	basicValueLabel := widget.NewLabel("50%")
+	basicValueLabel.TextStyle = fyne.TextStyle{Bold: true}
+	basicValueLabel.Alignment = fyne.TextAlignCenter
+
+	basicKnob.OnChanged = func(value float64) {
+		basicValueLabel.SetText(fmt.Sprintf("%.0f%%", value))
+	}
+
+	basicDisplay := makeKnobWithIcon(basicKnob, "📊", basicValueLabel, basicKnob.AccentColor)
+
+	basicCard := widget.NewCard("Basic Knob", "Standard 0-100 range",
+		container.NewCenter(basicDisplay))
+
+	// 2. TEMPERATURE CONTROL - Blue/Red gradient feel
 	tempKnob := widget.NewRotatingKnob(-20, 40)
 	tempKnob.SetValue(20)
 	tempKnob.Step = 0.5
-	tempKnob.TickCount = 13 // -20, -15, -10, ..., 35, 40
-	tempValueLabel := widget.NewLabel("Temperature: 20.0°C")
+	tempKnob.TickCount = 13
+	// Use blue-to-red color based on temperature
+	tempKnob.AccentColor = color.NRGBA{R: 255, G: 69, B: 0, A: 255} // Red-Orange for warmth
+	tempKnob.TrackColor = color.NRGBA{R: 70, G: 130, B: 180, A: 80}  // Steel blue (faded)
+
+	tempValueLabel := widget.NewLabel("20.0°C")
+	tempValueLabel.TextStyle = fyne.TextStyle{Bold: true}
+	tempValueLabel.Alignment = fyne.TextAlignCenter
+
 	tempKnob.OnChanged = func(value float64) {
-		tempValueLabel.SetText(fmt.Sprintf("Temperature: %.1f°C", value))
+		tempValueLabel.SetText(fmt.Sprintf("%.1f°C", value))
+		// Change color based on temperature
+		if value < 0 {
+			tempKnob.AccentColor = color.NRGBA{R: 0, G: 149, B: 255, A: 255} // Cold blue
+		} else if value < 20 {
+			tempKnob.AccentColor = color.NRGBA{R: 100, G: 200, B: 255, A: 255} // Cool blue
+		} else if value < 30 {
+			tempKnob.AccentColor = color.NRGBA{R: 255, G: 165, B: 0, A: 255} // Orange
+		} else {
+			tempKnob.AccentColor = color.NRGBA{R: 255, G: 69, B: 0, A: 255} // Hot red
+		}
+		tempKnob.Refresh()
 	}
 
-	tempCard := widget.NewCard("Temperature Control", "Range: -20°C to 40°C",
-		container.NewVBox(
-			container.NewCenter(tempKnob),
-			tempValueLabel,
-		))
+	tempDisplay := makeKnobWithIcon(tempKnob, "🌡️", tempValueLabel, nil)
 
-	// Volume knob (with custom angles)
-	volumeKnob := widget.NewRotatingKnob(0, 10)
+	tempCard := widget.NewCard("Temperature Control", "Dynamic color (-20°C to 40°C)",
+		container.NewCenter(tempDisplay))
+
+	// 3. VOLUME CONTROL - Goes to 11! (Spinal Tap reference)
+	volumeKnob := widget.NewRotatingKnob(0, 11)
 	volumeKnob.SetValue(5)
 	volumeKnob.StartAngle = -135
 	volumeKnob.EndAngle = 135
-	volumeKnob.Step = 0.1
-	volumeKnob.TickCount = 11
-	volumeValueLabel := widget.NewLabel("Volume: 5.0")
+	volumeKnob.Step = 0.5
+	volumeKnob.TickCount = 12 // 0-11
+	volumeKnob.AccentColor = color.NRGBA{R: 50, G: 205, B: 50, A: 255} // Lime green
+
+	volumeValueLabel := widget.NewLabel("5")
+	volumeValueLabel.TextStyle = fyne.TextStyle{Bold: true, Italic: false}
+	volumeValueLabel.Alignment = fyne.TextAlignCenter
+	volumeValueLabel.TextSize = 20
+
+	// Create a special "11" indicator
+	volume11Label := widget.NewLabel("")
+	volume11Label.TextStyle = fyne.TextStyle{Bold: true}
+	volume11Label.Alignment = fyne.TextAlignCenter
+
 	volumeKnob.OnChanged = func(value float64) {
-		volumeValueLabel.SetText(fmt.Sprintf("Volume: %.1f", value))
+		if value == 11 {
+			volumeValueLabel.SetText("11")
+			volume11Label.SetText("🎸 IT GOES TO ELEVEN! 🎸")
+			volumeKnob.AccentColor = color.NRGBA{R: 255, G: 215, B: 0, A: 255} // Gold for 11!
+		} else {
+			volumeValueLabel.SetText(fmt.Sprintf("%.0f", value))
+			volume11Label.SetText("")
+			// Green intensity increases with volume
+			intensity := uint8(50 + (value/11)*205)
+			volumeKnob.AccentColor = color.NRGBA{R: 0, G: intensity, B: 0, A: 255}
+		}
+		volumeKnob.Refresh()
 	}
 
-	volumeCard := widget.NewCard("Volume Control", "Range: 0-10, 270° sweep",
-		container.NewVBox(
-			container.NewCenter(volumeKnob),
-			volumeValueLabel,
-		))
+	volumeIcon := canvas.NewText("🔊", theme.ForegroundColor())
+	volumeIcon.TextSize = 32
+	volumeIcon.Alignment = fyne.TextAlignCenter
 
-	// Angle selector (wrapping enabled)
+	volumeDisplay := container.NewVBox(
+		container.NewCenter(volumeIcon),
+		layout.NewSpacer(),
+		container.NewCenter(volumeKnob),
+		layout.NewSpacer(),
+		container.NewCenter(volumeValueLabel),
+		container.NewCenter(volume11Label),
+	)
+
+	volumeCard := widget.NewCard("Volume Control", "These go to eleven! 🎸",
+		container.NewCenter(volumeDisplay))
+
+	// 4. ANGLE SELECTOR - Compass style
 	angleKnob := widget.NewRotatingKnob(0, 359)
 	angleKnob.SetValue(0)
 	angleKnob.Wrapping = true
 	angleKnob.StartAngle = 0
 	angleKnob.EndAngle = 359
 	angleKnob.TickCount = 8 // N, NE, E, SE, S, SW, W, NW
-	angleValueLabel := widget.NewLabel("Angle: 0°")
+	angleKnob.AccentColor = color.NRGBA{R: 138, G: 43, B: 226, A: 255} // Blue-violet
+
+	angleValueLabel := widget.NewLabel("0° N")
+	angleValueLabel.TextStyle = fyne.TextStyle{Bold: true}
+	angleValueLabel.Alignment = fyne.TextAlignCenter
+
 	angleKnob.OnChanged = func(value float64) {
-		angleValueLabel.SetText(fmt.Sprintf("Angle: %.0f°", value))
+		direction := getCompassDirection(value)
+		angleValueLabel.SetText(fmt.Sprintf("%.0f° %s", value, direction))
 	}
 
-	angleCard := widget.NewCard("Angle Selector", "Wrapping enabled, full circle",
-		container.NewVBox(
-			container.NewCenter(angleKnob),
-			angleValueLabel,
-		))
+	angleDisplay := makeKnobWithIcon(angleKnob, "🧭", angleValueLabel, angleKnob.AccentColor)
 
-	// Data binding example
+	angleCard := widget.NewCard("Angle Selector", "Full 360° with wrapping",
+		container.NewCenter(angleDisplay))
+
+	// 5. DATA BINDING - Purple with sync icon
 	boundData := binding.NewFloat()
 	boundData.Set(25.0)
 	boundKnob := widget.NewRotatingKnobWithData(0, 100, boundData)
-	boundValueLabel := widget.NewLabel("Value: 25.0")
+	boundKnob.AccentColor = color.NRGBA{R: 147, G: 112, B: 219, A: 255} // Medium purple
+
+	boundValueLabel := widget.NewLabel("25")
+	boundValueLabel.TextStyle = fyne.TextStyle{Bold: true}
+	boundValueLabel.Alignment = fyne.TextAlignCenter
+
 	boundData.AddListener(binding.NewDataListener(func() {
 		val, _ := boundData.Get()
-		boundValueLabel.SetText(fmt.Sprintf("Value: %.1f", val))
+		boundValueLabel.SetText(fmt.Sprintf("%.0f", val))
 	}))
 
-	// External control buttons for data binding demo
-	incButton := widget.NewButton("Increment", func() {
+	incButton := widget.NewButton("+ 5", func() {
 		val, _ := boundData.Get()
 		boundData.Set(val + 5)
 	})
-	decButton := widget.NewButton("Decrement", func() {
+	decButton := widget.NewButton("- 5", func() {
 		val, _ := boundData.Get()
 		boundData.Set(val - 5)
 	})
 
-	boundCard := widget.NewCard("Data Binding", "Bound to external data",
-		container.NewVBox(
-			container.NewCenter(boundKnob),
-			boundValueLabel,
-			container.NewGridWithColumns(2, incButton, decButton),
-		))
+	boundIcon := canvas.NewText("🔄", theme.ForegroundColor())
+	boundIcon.TextSize = 32
+	boundIcon.Alignment = fyne.TextAlignCenter
 
-	// Disabled knob example
+	boundDisplay := container.NewVBox(
+		container.NewCenter(boundIcon),
+		layout.NewSpacer(),
+		container.NewCenter(boundKnob),
+		layout.NewSpacer(),
+		container.NewCenter(boundValueLabel),
+		container.NewGridWithColumns(2, incButton, decButton),
+	)
+
+	boundCard := widget.NewCard("Data Binding", "Bound to external data",
+		container.NewCenter(boundDisplay))
+
+	// 6. DISABLED STATE - Gray with lock icon
 	disabledKnob := widget.NewRotatingKnob(0, 100)
 	disabledKnob.SetValue(75)
 	disabledKnob.Disable()
-	disabledLabel := widget.NewLabel("Value: 75.0 (Disabled)")
 
-	enableToggle := widget.NewCheck("Enable Knob", func(checked bool) {
+	disabledLabel := widget.NewLabel("75 (Locked)")
+	disabledLabel.Alignment = fyne.TextAlignCenter
+	disabledLabel.TextStyle = fyne.TextStyle{Bold: true}
+
+	enableToggle := widget.NewCheck("Unlock", func(checked bool) {
 		if checked {
 			disabledKnob.Enable()
-			disabledLabel.SetText(fmt.Sprintf("Value: %.1f (Enabled)", disabledKnob.Value))
+			disabledKnob.AccentColor = color.NRGBA{R: 34, G: 139, B: 34, A: 255} // Forest green
+			disabledLabel.SetText(fmt.Sprintf("%.0f (Unlocked)", disabledKnob.Value))
 		} else {
 			disabledKnob.Disable()
-			disabledLabel.SetText(fmt.Sprintf("Value: %.1f (Disabled)", disabledKnob.Value))
+			disabledKnob.AccentColor = nil
+			disabledLabel.SetText(fmt.Sprintf("%.0f (Locked)", disabledKnob.Value))
 		}
+		disabledKnob.Refresh()
 	})
 
-	disabledCard := widget.NewCard("Disabled State", "Toggle to enable/disable",
-		container.NewVBox(
-			container.NewCenter(disabledKnob),
-			disabledLabel,
-			enableToggle,
-		))
-
-	// Fine control knob (no ticks, small steps)
-	fineKnob := widget.NewRotatingKnob(0, 1)
-	fineKnob.SetValue(0.5)
-	fineKnob.Step = 0.01
-	fineKnob.ShowTicks = false
-	fineValueLabel := widget.NewLabel("Value: 0.500")
-	fineKnob.OnChanged = func(value float64) {
-		fineValueLabel.SetText(fmt.Sprintf("Value: %.3f", value))
+	disabledKnob.OnChanged = func(value float64) {
+		if !disabledKnob.Disabled() {
+			disabledLabel.SetText(fmt.Sprintf("%.0f (Unlocked)", value))
+		}
 	}
 
-	fineCard := widget.NewCard("Fine Control", "0-1 range, no ticks, 0.01 step",
+	disabledDisplay := makeKnobWithIcon(disabledKnob, "🔒", disabledLabel, nil)
+
+	disabledCard := widget.NewCard("Disabled State", "Toggle to unlock",
 		container.NewVBox(
-			container.NewCenter(fineKnob),
-			fineValueLabel,
+			container.NewCenter(disabledDisplay),
+			container.NewCenter(enableToggle),
 		))
 
-	// Interactive test panel
+	// 7. FINE CONTROL - Cyan, no ticks, precision dial
+	fineKnob := widget.NewRotatingKnob(0, 1)
+	fineKnob.SetValue(0.5)
+	fineKnob.Step = 0.001
+	fineKnob.ShowTicks = false
+	fineKnob.AccentColor = color.NRGBA{R: 0, G: 206, B: 209, A: 255} // Dark turquoise
+
+	fineValueLabel := widget.NewLabel("0.500")
+	fineValueLabel.TextStyle = fyne.TextStyle{Bold: true, Monospace: true}
+	fineValueLabel.Alignment = fyne.TextAlignCenter
+
+	fineKnob.OnChanged = func(value float64) {
+		fineValueLabel.SetText(fmt.Sprintf("%.3f", value))
+	}
+
+	fineDisplay := makeKnobWithIcon(fineKnob, "🎯", fineValueLabel, fineKnob.AccentColor)
+
+	fineCard := widget.NewCard("Fine Control", "0-1 range, 0.001 step precision",
+		container.NewCenter(fineDisplay))
+
+	// 8. INTERACTIVE TEST PANEL - Rainbow colors
 	testKnob := widget.NewRotatingKnob(0, 100)
 	testKnob.SetValue(50)
-	testValueLabel := widget.NewLabel("Value: 50.0")
+
+	testValueLabel := widget.NewLabel("50")
+	testValueLabel.TextStyle = fyne.TextStyle{Bold: true}
+	testValueLabel.Alignment = fyne.TextAlignCenter
+	testValueLabel.TextSize = 18
+
 	testEventLog := widget.NewLabel("Events: None")
+	testEventLog.Alignment = fyne.TextAlignCenter
 
 	changedCount := 0
 	endedCount := 0
 
 	testKnob.OnChanged = func(value float64) {
 		changedCount++
-		testValueLabel.SetText(fmt.Sprintf("Value: %.1f", value))
+		testValueLabel.SetText(fmt.Sprintf("%.0f", value))
 		testEventLog.SetText(fmt.Sprintf("OnChanged: %d | OnChangeEnded: %d", changedCount, endedCount))
+
+		// Rainbow effect based on value
+		hue := value / 100.0
+		testKnob.AccentColor = hueToRGB(hue)
+		testKnob.Refresh()
 	}
+
 	testKnob.OnChangeEnded = func(value float64) {
 		endedCount++
 		testEventLog.SetText(fmt.Sprintf("OnChanged: %d | OnChangeEnded: %d", changedCount, endedCount))
 	}
 
-	setMinButton := widget.NewButton("Set Min (0)", func() {
+	setMinButton := widget.NewButton("Min (0)", func() {
 		testKnob.SetValue(testKnob.Min)
 	})
-	setMaxButton := widget.NewButton("Set Max (100)", func() {
+	setMaxButton := widget.NewButton("Max (100)", func() {
 		testKnob.SetValue(testKnob.Max)
 	})
-	setMidButton := widget.NewButton("Set Mid (50)", func() {
+	setMidButton := widget.NewButton("Mid (50)", func() {
 		testKnob.SetValue((testKnob.Min + testKnob.Max) / 2)
 	})
 	resetEventsButton := widget.NewButton("Reset Events", func() {
@@ -181,43 +306,50 @@ func RotatingKnobScreen(_ fyne.Window) fyne.CanvasObject {
 		testEventLog.SetText("Events: Reset")
 	})
 
-	testCard := widget.NewCard("Interactive Test", "Test automation features",
-		container.NewVBox(
-			container.NewCenter(testKnob),
-			testValueLabel,
-			testEventLog,
-			container.NewGridWithColumns(2,
-				setMinButton, setMaxButton,
-			),
-			container.NewGridWithColumns(2,
-				setMidButton, resetEventsButton,
-			),
-		))
+	testIcon := canvas.NewText("🌈", theme.ForegroundColor())
+	testIcon.TextSize = 32
+	testIcon.Alignment = fyne.TextAlignCenter
 
-	// Instructions
+	testDisplay := container.NewVBox(
+		container.NewCenter(testIcon),
+		layout.NewSpacer(),
+		container.NewCenter(testKnob),
+		layout.NewSpacer(),
+		container.NewCenter(testValueLabel),
+		testEventLog,
+		container.NewGridWithColumns(2, setMinButton, setMaxButton),
+		container.NewGridWithColumns(2, setMidButton, resetEventsButton),
+	)
+
+	testCard := widget.NewCard("Interactive Test", "Rainbow colors, event tracking",
+		container.NewCenter(testDisplay))
+
+	// Instructions with visual styling
 	instructionsText := canvas.NewText(
-		"How to use:\n"+
-			"• Drag: Click and drag in a circular motion\n"+
-			"• Tap: Click at any position to jump to that value\n"+
-			"• Keyboard: Use arrow keys (Up/Right increase, Down/Left decrease)\n"+
-			"• Keyboard: Home/End for min/max, Page Up/Down for larger steps\n"+
-			"• Scroll: Use mouse wheel to adjust value\n"+
-			"• Hover: Visual feedback when mouse is over knob\n"+
-			"• Focus: Click to focus, visual indicator when focused",
+		"✨ INTERACTION GUIDE ✨\n\n"+
+			"🖱️  Drag: Click and rotate in circular motion\n"+
+			"👆 Tap: Click anywhere to jump to that value\n"+
+			"⌨️  Keyboard: Arrow keys (↑/→ increase, ↓/← decrease)\n"+
+			"🏠 Home/End: Jump to min/max values\n"+
+			"📄 Page Up/Down: Larger steps (10x)\n"+
+			"🖲️  Scroll: Mouse wheel for fine adjustment\n"+
+			"👀 Hover: Visual feedback when mouse is over\n"+
+			"🎯 Focus: Visual indicator when focused",
 		theme.ForegroundColor(),
 	)
-	instructionsText.TextSize = 12
+	instructionsText.TextSize = 11
+	instructionsText.Alignment = fyne.TextAlignLeading
 
-	instructions := widget.NewCard("Instructions", "Interaction methods",
-		container.NewVBox(instructionsText),
-	)
+	instructions := widget.NewCard("How to Use", "Multiple interaction methods",
+		container.NewVBox(instructionsText))
 
-	// Features panel
+	// Features panel with icons
 	featuresText := canvas.NewText(
-		"Features:\n"+
-			"• Configurable range (min, max)\n"+
+		"🎨 FEATURES:\n\n"+
+			"• Custom colors and visual styling\n"+
+			"• Configurable value ranges (min, max)\n"+
 			"• Custom start/end angles (partial rotation)\n"+
-			"• Optional value wrapping\n"+
+			"• Optional value wrapping (360° controls)\n"+
 			"• Visual tick marks (configurable count)\n"+
 			"• Step size for incremental changes\n"+
 			"• Hover and focus states\n"+
@@ -228,43 +360,12 @@ func RotatingKnobScreen(_ fyne.Window) fyne.CanvasObject {
 			"• Touch-friendly interaction",
 		theme.ForegroundColor(),
 	)
-	featuresText.TextSize = 12
+	featuresText.TextSize = 11
 
-	features := widget.NewCard("Features", "Capabilities",
-		container.NewVBox(featuresText),
-	)
+	features := widget.NewCard("Widget Capabilities", "Production-ready features",
+		container.NewVBox(featuresText))
 
-	// Automation example code
-	codeText := `// Automated Testing Example
-func TestRotatingKnobAutomation(t *testing.T) {
-    knob := widget.NewRotatingKnob(0, 100)
-
-    // Set value programmatically
-    knob.SetValue(75)
-    assert.Equal(t, 75.0, knob.Value)
-
-    // Test callbacks
-    var lastValue float64
-    knob.OnChanged = func(value float64) {
-        lastValue = value
-    }
-
-    // Simulate user interactions
-    test.Tap(knob)
-    test.Drag(knob, startPos, delta)
-    test.Type(knob, "Up")
-
-    // Verify state
-    assert.True(t, knob.Focused())
-    assert.False(t, knob.Disabled())
-}`
-
-	codeLabel := widget.NewLabel(codeText)
-	automationCard := widget.NewCard("Automation Example", "Testing code",
-		container.NewScroll(codeLabel),
-	)
-
-	// Layout everything in a grid
+	// Layout in a responsive grid
 	leftColumn := container.NewVBox(
 		basicCard,
 		tempCard,
@@ -282,7 +383,6 @@ func TestRotatingKnobAutomation(t *testing.T) {
 	bottomRow := container.NewVBox(
 		instructions,
 		features,
-		automationCard,
 	)
 
 	topRow := container.NewGridWithColumns(2,
@@ -301,6 +401,46 @@ func TestRotatingKnobAutomation(t *testing.T) {
 	)
 }
 
+// getCompassDirection returns the compass direction for a given angle
+func getCompassDirection(angle float64) string {
+	directions := []string{"N", "NE", "E", "SE", "S", "SW", "W", "NW"}
+	index := int((angle + 22.5) / 45) % 8
+	return directions[index]
+}
+
+// hueToRGB converts a hue value (0-1) to RGB color
+func hueToRGB(hue float64) color.Color {
+	// Simple HSV to RGB with S=1, V=1
+	h := hue * 6.0
+	x := uint8(255 * (1 - abs(mod(h, 2.0)-1)))
+
+	switch int(h) {
+	case 0:
+		return color.NRGBA{R: 255, G: x, B: 0, A: 255}
+	case 1:
+		return color.NRGBA{R: x, G: 255, B: 0, A: 255}
+	case 2:
+		return color.NRGBA{R: 0, G: 255, B: x, A: 255}
+	case 3:
+		return color.NRGBA{R: 0, G: x, B: 255, A: 255}
+	case 4:
+		return color.NRGBA{R: x, G: 0, B: 255, A: 255}
+	default:
+		return color.NRGBA{R: 255, G: 0, B: x, A: 255}
+	}
+}
+
+func abs(x float64) float64 {
+	if x < 0 {
+		return -x
+	}
+	return x
+}
+
+func mod(x, y float64) float64 {
+	return x - y*float64(int(x/y))
+}
+
 // RotatingKnobTitle returns the title for the rotating knob tutorial
 func RotatingKnobTitle() string {
 	return "Rotating Knob"
@@ -308,5 +448,5 @@ func RotatingKnobTitle() string {
 
 // RotatingKnobDescription returns the description for the rotating knob tutorial
 func RotatingKnobDescription() string {
-	return "Circular dial/knob control for value selection, similar to a potentiometer or volume knob"
+	return "Circular dial/knob control for value selection with rich visual customization"
 }
