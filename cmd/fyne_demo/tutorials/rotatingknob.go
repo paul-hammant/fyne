@@ -101,9 +101,9 @@ func RotatingKnobScreen(_ fyne.Window) fyne.CanvasObject {
 	volumeKnob.Step = 1
 	volumeKnob.TickCount = 12 // 0-11
 	volumeKnob.AccentColor = color.NRGBA{R: 50, G: 205, B: 50, A: 255} // Lime green
-	volumeKnob.WedgeColor = color.NRGBA{R: 50, G: 205, B: 50, A: 60}   // Semi-transparent green wedge
-	volumeKnob.TrackColor = color.NRGBA{R: 80, G: 80, B: 80, A: 40}    // Subtle gray track
+	volumeKnob.TrackColor = color.NRGBA{R: 50, G: 205, B: 50, A: 60}   // Semi-transparent green for full range
 	volumeKnob.ShowTicks = true
+	// No wedge - just use colored track to show the range
 
 	volumeValueLabel := widget.NewLabel("11")
 	volumeValueLabel.TextStyle = fyne.TextStyle{Bold: true, Italic: false}

@@ -198,19 +198,23 @@ func (k *RotatingKnob) MinSize() fyne.Size {
 func (k *RotatingKnob) CreateRenderer() fyne.WidgetRenderer {
 	k.ExtendBaseWidget(k)
 
-	// Wedge backdrop (filled arc showing current value range)
+	// Wedge backdrop (thick arc showing current value range)
 	var wedge *canvas.Arc
 	if k.WedgeColor != nil {
-		wedge = canvas.NewArc(0, 0, 0, k.WedgeColor)
+		wedge = canvas.NewArc(0, 0, 0.9, color.Transparent) // High cutout ratio to minimize inner edge
+		wedge.StrokeColor = k.WedgeColor
+		wedge.StrokeWidth = 20 // Thick stroke
 	}
 
 	// Track arc (the full range available)
-	track := canvas.NewArc(0, 0, 0, theme.DisabledColor())
+	track := canvas.NewArc(0, 0, 0.9, color.Transparent) // High cutout ratio to minimize inner edge visibility
 	track.StrokeWidth = 8
+	track.StrokeColor = theme.DisabledColor()
 
 	// Active arc (the current value indicator)
-	active := canvas.NewArc(0, 0, 0, theme.PrimaryColor())
+	active := canvas.NewArc(0, 0, 0.9, color.Transparent) // High cutout ratio to minimize inner edge visibility
 	active.StrokeWidth = 8
+	active.StrokeColor = theme.PrimaryColor()
 
 	// Indicator line (points to current value)
 	indicator := canvas.NewLine(theme.ForegroundColor())
@@ -501,9 +505,9 @@ func (r *rotatingKnobRenderer) Layout(size fyne.Size) {
 	}
 	currentAngle := startAngle + ratio*sweep
 
-	// Wedge backdrop - fills from start angle to current value
+	// Wedge backdrop - thick arc along circumference (same size as track/active)
 	if r.wedge != nil {
-		wedgeDiameter := diameter * 0.75
+		wedgeDiameter := diameter * 0.85 // Same size as track/active arcs
 		wedgeRadius := wedgeDiameter / 2
 		r.wedge.Resize(fyne.NewSize(wedgeDiameter, wedgeDiameter))
 		r.wedge.Move(fyne.NewPos(centerX-wedgeRadius, centerY-wedgeRadius))
@@ -593,7 +597,9 @@ func (r *rotatingKnobRenderer) Refresh() {
 	// Update colors based on state
 	if r.knob.Disabled() {
 		if r.wedge != nil {
-			r.wedge.FillColor = theme.DisabledColor()
+			r.wedge.StrokeColor = theme.DisabledColor()
+			r.wedge.FillColor = color.Transparent
+			r.wedge.CutoutRatio = 1.0 // No closure lines
 		}
 		r.track.StrokeColor = theme.DisabledColor()
 		r.active.StrokeColor = theme.DisabledColor()
@@ -604,9 +610,11 @@ func (r *rotatingKnobRenderer) Refresh() {
 			tick.StrokeColor = theme.DisabledColor()
 		}
 	} else {
-		// Wedge backdrop
+		// Wedge backdrop (thick stroke, not fill)
 		if r.wedge != nil && r.knob.WedgeColor != nil {
-			r.wedge.FillColor = r.knob.WedgeColor
+			r.wedge.StrokeColor = r.knob.WedgeColor
+			r.wedge.FillColor = color.Transparent
+			r.wedge.CutoutRatio = 1.0 // No closure lines
 		}
 
 		// Track shows the full range (subtle)
