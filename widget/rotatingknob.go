@@ -204,7 +204,7 @@ func (k *RotatingKnob) CreateRenderer() fyne.WidgetRenderer {
 	// Wedge backdrop (filled arc showing current value range)
 	var wedge *canvas.Arc
 	if k.WedgeColor != nil {
-		wedge = canvas.NewArc(float32(k.StartAngle), float32(k.StartAngle), 0.3, k.WedgeColor)
+		wedge = canvas.NewArc(float32(k.StartAngle), float32(k.StartAngle), 0.0, k.WedgeColor)
 	}
 
 	// Track arc (the full range available)
