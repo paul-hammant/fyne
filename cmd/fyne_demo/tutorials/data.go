@@ -141,10 +141,10 @@ var (
 			"Show duration or the need to wait for a task.",
 			makeProgressTab,
 		},
-		"rotatingknob": {
-			RotatingKnobTitle(),
-			RotatingKnobDescription(),
-			RotatingKnobScreen,
+		"rotarycontrol": {
+			RotaryControlTitle(),
+			RotaryControlDescription(),
+			RotaryControlScreen,
 		},
 		"collections": {
 			"Collections",
@@ -200,6 +200,6 @@ var (
 		"":            {"welcome", "canvas", "animations", "icons", "widgets", "collections", "containers", "dialogs", "windows", "binding", "advanced"},
 		"collections": {"list", "table", "tree", "gridwrap"},
 		"containers":  {"apptabs", "border", "box", "center", "doctabs", "grid", "scroll", "split", "innerwindow"},
-		"widgets":     {"accordion", "activity", "button", "card", "entry", "form", "input", "progress", "rotatingknob", "text", "toolbar"},
+		"widgets":     {"accordion", "activity", "button", "card", "entry", "form", "input", "progress", "rotarycontrol", "text", "toolbar"},
 	}
 )

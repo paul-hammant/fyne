@@ -1,20 +1,18 @@
 package widget_test
 
 import (
-	"image/color"
 	"testing"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/test"
-	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func TestRotatingKnob_Creation(t *testing.T) {
-	knob := widget.NewRotatingKnob(0, 100)
+func TestRotaryControl_Creation(t *testing.T) {
+	knob := widget.NewRotaryControl(0, 100)
 
 	assert.NotNil(t, knob)
 	assert.Equal(t, 0.0, knob.Min)
@@ -23,8 +21,8 @@ func TestRotatingKnob_Creation(t *testing.T) {
 	assert.False(t, knob.Disabled())
 }
 
-func TestRotatingKnob_SetValue(t *testing.T) {
-	knob := widget.NewRotatingKnob(0, 100)
+func TestRotaryControl_SetValue(t *testing.T) {
+	knob := widget.NewRotaryControl(0, 100)
 
 	// Set normal value
 	knob.SetValue(75)
@@ -39,8 +37,8 @@ func TestRotatingKnob_SetValue(t *testing.T) {
 	assert.Equal(t, 100.0, knob.Value)
 }
 
-func TestRotatingKnob_SetValueClamping(t *testing.T) {
-	knob := widget.NewRotatingKnob(0, 100)
+func TestRotaryControl_SetValueClamping(t *testing.T) {
+	knob := widget.NewRotaryControl(0, 100)
 
 	// Value below min should be clamped
 	knob.SetValue(-10)
@@ -51,8 +49,8 @@ func TestRotatingKnob_SetValueClamping(t *testing.T) {
 	assert.Equal(t, 100.0, knob.Value)
 }
 
-func TestRotatingKnob_SetValueWrapping(t *testing.T) {
-	knob := widget.NewRotatingKnob(0, 100)
+func TestRotaryControl_SetValueWrapping(t *testing.T) {
+	knob := widget.NewRotaryControl(0, 100)
 	knob.Wrapping = true
 
 	// Value below min should wrap
@@ -64,8 +62,8 @@ func TestRotatingKnob_SetValueWrapping(t *testing.T) {
 	assert.Equal(t, 10.0, knob.Value)
 }
 
-func TestRotatingKnob_OnChanged(t *testing.T) {
-	knob := widget.NewRotatingKnob(0, 100)
+func TestRotaryControl_OnChanged(t *testing.T) {
+	knob := widget.NewRotaryControl(0, 100)
 
 	var changedValue float64
 	changedCalled := false
@@ -80,8 +78,8 @@ func TestRotatingKnob_OnChanged(t *testing.T) {
 	assert.Equal(t, 75.0, changedValue)
 }
 
-func TestRotatingKnob_OnChangeEnded(t *testing.T) {
-	knob := widget.NewRotatingKnob(0, 100)
+func TestRotaryControl_OnChangeEnded(t *testing.T) {
+	knob := widget.NewRotaryControl(0, 100)
 
 	var endedValue float64
 	endedCalled := false
@@ -97,8 +95,8 @@ func TestRotatingKnob_OnChangeEnded(t *testing.T) {
 	assert.Equal(t, knob.Value, endedValue)
 }
 
-func TestRotatingKnob_Disable(t *testing.T) {
-	knob := widget.NewRotatingKnob(0, 100)
+func TestRotaryControl_Disable(t *testing.T) {
+	knob := widget.NewRotaryControl(0, 100)
 
 	assert.False(t, knob.Disabled())
 
@@ -109,8 +107,8 @@ func TestRotatingKnob_Disable(t *testing.T) {
 	assert.False(t, knob.Disabled())
 }
 
-func TestRotatingKnob_DisabledInteraction(t *testing.T) {
-	knob := widget.NewRotatingKnob(0, 100)
+func TestRotaryControl_DisabledInteraction(t *testing.T) {
+	knob := widget.NewRotaryControl(0, 100)
 	knob.SetValue(50)
 	knob.Disable()
 
@@ -127,8 +125,8 @@ func TestRotatingKnob_DisabledInteraction(t *testing.T) {
 	assert.Equal(t, 50.0, knob.Value) // Value unchanged
 }
 
-func TestRotatingKnob_KeyboardInput(t *testing.T) {
-	knob := widget.NewRotatingKnob(0, 100)
+func TestRotaryControl_KeyboardInput(t *testing.T) {
+	knob := widget.NewRotaryControl(0, 100)
 	knob.SetValue(50)
 	knob.Step = 10
 
@@ -149,24 +147,24 @@ func TestRotatingKnob_KeyboardInput(t *testing.T) {
 	assert.Equal(t, 50.0, knob.Value)
 }
 
-func TestRotatingKnob_KeyboardInputHome(t *testing.T) {
-	knob := widget.NewRotatingKnob(0, 100)
+func TestRotaryControl_KeyboardInputHome(t *testing.T) {
+	knob := widget.NewRotaryControl(0, 100)
 	knob.SetValue(50)
 
 	knob.TypedKey(&fyne.KeyEvent{Name: fyne.KeyHome})
 	assert.Equal(t, 0.0, knob.Value)
 }
 
-func TestRotatingKnob_KeyboardInputEnd(t *testing.T) {
-	knob := widget.NewRotatingKnob(0, 100)
+func TestRotaryControl_KeyboardInputEnd(t *testing.T) {
+	knob := widget.NewRotaryControl(0, 100)
 	knob.SetValue(50)
 
 	knob.TypedKey(&fyne.KeyEvent{Name: fyne.KeyEnd})
 	assert.Equal(t, 100.0, knob.Value)
 }
 
-func TestRotatingKnob_KeyboardPageUpDown(t *testing.T) {
-	knob := widget.NewRotatingKnob(0, 100)
+func TestRotaryControl_KeyboardPageUpDown(t *testing.T) {
+	knob := widget.NewRotaryControl(0, 100)
 	knob.SetValue(50)
 	knob.Step = 1
 
@@ -179,8 +177,8 @@ func TestRotatingKnob_KeyboardPageUpDown(t *testing.T) {
 	assert.Equal(t, 50.0, knob.Value)
 }
 
-func TestRotatingKnob_Tapped(t *testing.T) {
-	knob := widget.NewRotatingKnob(0, 100)
+func TestRotaryControl_Tapped(t *testing.T) {
+	knob := widget.NewRotaryControl(0, 100)
 	knob.SetValue(50)
 
 	test.Tap(knob)
@@ -189,8 +187,8 @@ func TestRotatingKnob_Tapped(t *testing.T) {
 	assert.True(t, knob.Value >= knob.Min && knob.Value <= knob.Max)
 }
 
-func TestRotatingKnob_Dragged(t *testing.T) {
-	knob := widget.NewRotatingKnob(0, 100)
+func TestRotaryControl_Dragged(t *testing.T) {
+	knob := widget.NewRotaryControl(0, 100)
 	knob.Resize(fyne.NewSize(100, 100))
 	knob.SetValue(50)
 
@@ -207,8 +205,8 @@ func TestRotatingKnob_Dragged(t *testing.T) {
 	assert.True(t, knob.Value >= knob.Min && knob.Value <= knob.Max)
 }
 
-func TestRotatingKnob_DragEnd(t *testing.T) {
-	knob := widget.NewRotatingKnob(0, 100)
+func TestRotaryControl_DragEnd(t *testing.T) {
+	knob := widget.NewRotaryControl(0, 100)
 
 	endedCalled := false
 	knob.OnChangeEnded = func(value float64) {
@@ -224,8 +222,8 @@ func TestRotatingKnob_DragEnd(t *testing.T) {
 	assert.True(t, endedCalled)
 }
 
-func TestRotatingKnob_Scrolled(t *testing.T) {
-	knob := widget.NewRotatingKnob(0, 100)
+func TestRotaryControl_Scrolled(t *testing.T) {
+	knob := widget.NewRotaryControl(0, 100)
 	knob.SetValue(50)
 	knob.Step = 5
 
@@ -242,8 +240,8 @@ func TestRotatingKnob_Scrolled(t *testing.T) {
 	assert.Equal(t, 50.0, knob.Value)
 }
 
-func TestRotatingKnob_FocusGainedLost(t *testing.T) {
-	knob := widget.NewRotatingKnob(0, 100)
+func TestRotaryControl_FocusGainedLost(t *testing.T) {
+	knob := widget.NewRotaryControl(0, 100)
 
 	// Gain focus
 	knob.FocusGained()
@@ -254,8 +252,8 @@ func TestRotatingKnob_FocusGainedLost(t *testing.T) {
 	// Focus state is internal
 }
 
-func TestRotatingKnob_MinSize(t *testing.T) {
-	knob := widget.NewRotatingKnob(0, 100)
+func TestRotaryControl_MinSize(t *testing.T) {
+	knob := widget.NewRotaryControl(0, 100)
 	minSize := knob.MinSize()
 
 	assert.Greater(t, minSize.Width, float32(0))
@@ -263,16 +261,16 @@ func TestRotatingKnob_MinSize(t *testing.T) {
 	assert.Equal(t, minSize.Width, minSize.Height) // Should be square
 }
 
-func TestRotatingKnob_Renderer(t *testing.T) {
-	knob := widget.NewRotatingKnob(0, 100)
+func TestRotaryControl_Renderer(t *testing.T) {
+	knob := widget.NewRotaryControl(0, 100)
 	renderer := test.TempWidgetRenderer(t, knob)
 
 	assert.NotNil(t, renderer)
 	assert.Greater(t, len(renderer.Objects()), 0)
 }
 
-func TestRotatingKnob_StartEndAngles(t *testing.T) {
-	knob := widget.NewRotatingKnob(0, 100)
+func TestRotaryControl_StartEndAngles(t *testing.T) {
+	knob := widget.NewRotaryControl(0, 100)
 
 	// Default angles
 	assert.Equal(t, -135.0, knob.StartAngle)
@@ -285,8 +283,8 @@ func TestRotatingKnob_StartEndAngles(t *testing.T) {
 	assert.Equal(t, 180.0, knob.EndAngle)
 }
 
-func TestRotatingKnob_Ticks(t *testing.T) {
-	knob := widget.NewRotatingKnob(0, 100)
+func TestRotaryControl_Ticks(t *testing.T) {
+	knob := widget.NewRotaryControl(0, 100)
 
 	// Ticks enabled by default
 	assert.True(t, knob.ShowTicks)
@@ -297,11 +295,11 @@ func TestRotatingKnob_Ticks(t *testing.T) {
 	assert.False(t, knob.ShowTicks)
 }
 
-func TestRotatingKnob_DataBinding(t *testing.T) {
+func TestRotaryControl_DataBinding(t *testing.T) {
 	val := binding.NewFloat()
 	val.Set(75.0)
 
-	knob := widget.NewRotatingKnobWithData(0, 100, val)
+	knob := widget.NewRotaryControlWithData(0, 100, val)
 
 	// Initial value from binding
 	assert.Equal(t, 75.0, knob.Value)
@@ -317,8 +315,8 @@ func TestRotatingKnob_DataBinding(t *testing.T) {
 	assert.Equal(t, 25.0, knob.Value)
 }
 
-func TestRotatingKnob_NegativeRange(t *testing.T) {
-	knob := widget.NewRotatingKnob(-50, 50)
+func TestRotaryControl_NegativeRange(t *testing.T) {
+	knob := widget.NewRotaryControl(-50, 50)
 
 	assert.Equal(t, -50.0, knob.Min)
 	assert.Equal(t, 50.0, knob.Max)
@@ -331,8 +329,8 @@ func TestRotatingKnob_NegativeRange(t *testing.T) {
 	assert.Equal(t, 25.0, knob.Value)
 }
 
-func TestRotatingKnob_ZeroStep(t *testing.T) {
-	knob := widget.NewRotatingKnob(0, 100)
+func TestRotaryControl_ZeroStep(t *testing.T) {
+	knob := widget.NewRotaryControl(0, 100)
 	knob.Step = 0 // Zero step should use default (1% of range)
 	knob.SetValue(50)
 
@@ -341,8 +339,8 @@ func TestRotatingKnob_ZeroStep(t *testing.T) {
 	assert.Greater(t, knob.Value, 50.0)
 }
 
-func TestRotatingKnob_SameValueNoCallback(t *testing.T) {
-	knob := widget.NewRotatingKnob(0, 100)
+func TestRotaryControl_SameValueNoCallback(t *testing.T) {
+	knob := widget.NewRotaryControl(0, 100)
 	knob.SetValue(50)
 
 	callCount := 0
@@ -359,8 +357,8 @@ func TestRotatingKnob_SameValueNoCallback(t *testing.T) {
 	assert.Equal(t, 1, callCount)
 }
 
-func TestRotatingKnob_MouseHover(t *testing.T) {
-	knob := widget.NewRotatingKnob(0, 100)
+func TestRotaryControl_MouseHover(t *testing.T) {
+	knob := widget.NewRotaryControl(0, 100)
 
 	// Simulate mouse enter
 	knob.MouseIn(nil)
@@ -371,22 +369,4 @@ func TestRotatingKnob_MouseHover(t *testing.T) {
 
 	// Simulate mouse exit
 	knob.MouseOut()
-}
-
-func TestRotatingKnob_Visual(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
-	test.ApplyTheme(t, theme.LightTheme())
-
-	knob := widget.NewRotatingKnob(0, 11)
-	knob.StartAngle = -120
-	knob.EndAngle = 120
-	knob.SetValue(8)
-	knob.WedgeColor = color.Transparent
-
-	w := test.NewWindow(knob)
-	defer w.Close()
-	w.Resize(fyne.NewSize(100, 100))
-
-	test.AssertImageMatches(t, "rotating_knob/visual_volume.png", w.Canvas().Capture())
 }

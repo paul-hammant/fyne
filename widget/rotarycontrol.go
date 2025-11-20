@@ -12,14 +12,14 @@ import (
 )
 
 // Declare compile-time interface conformance
-var _ fyne.Widget = (*RotatingKnob)(nil)
-var _ fyne.Draggable = (*RotatingKnob)(nil)
-var _ fyne.Tappable = (*RotatingKnob)(nil)
-var _ fyne.Focusable = (*RotatingKnob)(nil)
-var _ desktop.Hoverable = (*RotatingKnob)(nil)
-var _ fyne.Disableable = (*RotatingKnob)(nil)
+var _ fyne.Widget = (*RotaryControl)(nil)
+var _ fyne.Draggable = (*RotaryControl)(nil)
+var _ fyne.Tappable = (*RotaryControl)(nil)
+var _ fyne.Focusable = (*RotaryControl)(nil)
+var _ desktop.Hoverable = (*RotaryControl)(nil)
+var _ fyne.Disableable = (*RotaryControl)(nil)
 
-// RotatingKnob is a widget that provides a circular dial/knob control for selecting values
+// RotaryControl is a widget that provides a circular dial/knob control for selecting values
 // within a range, similar to a potentiometer or volume knob.
 //
 // The knob can be controlled via:
@@ -30,12 +30,14 @@ var _ fyne.Disableable = (*RotatingKnob)(nil)
 //
 // Example usage:
 //
-//	knob := widget.NewRotatingKnob(0, 100)
+//	knob := widget.NewRotaryControl(0, 100)
 //	knob.SetValue(50)
 //	knob.OnChanged = func(value float64) {
 //	    fmt.Printf("Value changed to: %.2f\n", value)
 //	}
-type RotatingKnob struct {
+//
+// Since: 2.7
+type RotaryControl struct {
 	DisableableWidget
 
 	// Value is the current value of the knob
@@ -78,16 +80,18 @@ type RotatingKnob struct {
 	focused bool
 }
 
-// NewRotatingKnob creates a new rotating knob widget with the specified min and max values.
+// NewRotaryControl creates a new rotary control widget with the specified min and max values.
 // The knob is initialized with a value at the midpoint of the range.
-func NewRotatingKnob(min, max float64) *RotatingKnob {
-	knob := &RotatingKnob{
+//
+// Since: 2.7
+func NewRotaryControl(min, max float64) *RotaryControl {
+	knob := &RotaryControl{
 		Value:      (min + max) / 2,
 		Min:        min,
 		Max:        max,
 		Step:       (max - min) / 100, // Default to 1% of range
 		StartAngle: -135,              // Bottom-left
-		EndAngle:   135,                // Bottom-right (270° total sweep)
+		EndAngle:   135,               // Bottom-right (270° total sweep)
 		ShowTicks:  true,
 		TickCount:  11, // 0, 10, 20, ... 100 for percentage-like display
 	}
@@ -95,21 +99,21 @@ func NewRotatingKnob(min, max float64) *RotatingKnob {
 	return knob
 }
 
-// NewRotatingKnobWithData creates a new rotating knob bound to a float data item.
+// NewRotaryControlWithData creates a new rotary control bound to a float data item.
 //
-// Since: 2.0
-func NewRotatingKnobWithData(min, max float64, data binding.Float) *RotatingKnob {
-	knob := NewRotatingKnob(min, max)
+// Since: 2.7
+func NewRotaryControlWithData(min, max float64, data binding.Float) *RotaryControl {
+	knob := NewRotaryControl(min, max)
 	knob.Bind(data)
 	return knob
 }
 
-// Bind connects the specified data source to this RotatingKnob.
+// Bind connects the specified data source to this RotaryControl.
 // The current value will be displayed and any changes in the data will cause the widget to update.
-// User interactions with this RotatingKnob will set the value into the data source.
+// User interactions with this RotaryControl will set the value into the data source.
 //
-// Since: 2.0
-func (k *RotatingKnob) Bind(data binding.Float) {
+// Since: 2.7
+func (k *RotaryControl) Bind(data binding.Float) {
 	k.binder.SetCallback(k.updateFromData)
 	k.binder.Bind(data)
 
@@ -118,17 +122,17 @@ func (k *RotatingKnob) Bind(data binding.Float) {
 	}
 }
 
-// Unbind disconnects any configured data source from this RotatingKnob.
+// Unbind disconnects any configured data source from this RotaryControl.
 // The current value will remain at the last value of the data source.
 //
-// Since: 2.0
-func (k *RotatingKnob) Unbind() {
+// Since: 2.7
+func (k *RotaryControl) Unbind() {
 	k.OnChanged = nil
 	k.binder.Unbind()
 }
 
 // updateFromData is called when the data changes
-func (k *RotatingKnob) updateFromData(data binding.DataItem) {
+func (k *RotaryControl) updateFromData(data binding.DataItem) {
 	if data == nil {
 		return
 	}
@@ -144,7 +148,7 @@ func (k *RotatingKnob) updateFromData(data binding.DataItem) {
 }
 
 // writeData writes the current value to the data binding
-func (k *RotatingKnob) writeData(data binding.DataItem) {
+func (k *RotaryControl) writeData(data binding.DataItem) {
 	if data == nil {
 		return
 	}
@@ -156,7 +160,7 @@ func (k *RotatingKnob) writeData(data binding.DataItem) {
 }
 
 // SetValue updates the knob value and refreshes the widget
-func (k *RotatingKnob) SetValue(value float64) {
+func (k *RotaryControl) SetValue(value float64) {
 	// Clamp to range (unless wrapping)
 	if !k.Wrapping {
 		if value < k.Min {
@@ -189,13 +193,13 @@ func (k *RotatingKnob) SetValue(value float64) {
 }
 
 // MinSize returns the minimum size for the knob
-func (k *RotatingKnob) MinSize() fyne.Size {
+func (k *RotaryControl) MinSize() fyne.Size {
 	k.ExtendBaseWidget(k)
 	return k.BaseWidget.MinSize()
 }
 
-// CreateRenderer creates the renderer for the rotating knob
-func (k *RotatingKnob) CreateRenderer() fyne.WidgetRenderer {
+// CreateRenderer creates the renderer for the rotary control
+func (k *RotaryControl) CreateRenderer() fyne.WidgetRenderer {
 	k.ExtendBaseWidget(k)
 
 	// Wedge backdrop (thick arc showing current value range)
@@ -243,7 +247,7 @@ func (k *RotatingKnob) CreateRenderer() fyne.WidgetRenderer {
 		}
 	}
 
-	r := &rotatingKnobRenderer{
+	r := &rotaryControlRenderer{
 		knob:      k,
 		wedge:     wedge,
 		track:     track,
@@ -259,7 +263,7 @@ func (k *RotatingKnob) CreateRenderer() fyne.WidgetRenderer {
 }
 
 // Dragged handles drag events for rotating the knob
-func (k *RotatingKnob) Dragged(e *fyne.DragEvent) {
+func (k *RotaryControl) Dragged(e *fyne.DragEvent) {
 	if k.Disabled() {
 		return
 	}
@@ -269,14 +273,14 @@ func (k *RotatingKnob) Dragged(e *fyne.DragEvent) {
 }
 
 // DragEnd is called when dragging ends
-func (k *RotatingKnob) DragEnd() {
+func (k *RotaryControl) DragEnd() {
 	if k.OnChangeEnded != nil {
 		k.OnChangeEnded(k.Value)
 	}
 }
 
 // Tapped handles tap events for jumping to a position
-func (k *RotatingKnob) Tapped(e *fyne.PointEvent) {
+func (k *RotaryControl) Tapped(e *fyne.PointEvent) {
 	if k.Disabled() {
 		return
 	}
@@ -290,24 +294,24 @@ func (k *RotatingKnob) Tapped(e *fyne.PointEvent) {
 }
 
 // FocusGained is called when the knob gains focus
-func (k *RotatingKnob) FocusGained() {
+func (k *RotaryControl) FocusGained() {
 	k.focused = true
 	k.Refresh()
 }
 
 // FocusLost is called when the knob loses focus
-func (k *RotatingKnob) FocusLost() {
+func (k *RotaryControl) FocusLost() {
 	k.focused = false
 	k.Refresh()
 }
 
 // TypedRune handles rune input (not used for knob)
-func (k *RotatingKnob) TypedRune(_ rune) {
+func (k *RotaryControl) TypedRune(_ rune) {
 	// Not used
 }
 
 // TypedKey handles keyboard input for adjusting the knob value
-func (k *RotatingKnob) TypedKey(key *fyne.KeyEvent) {
+func (k *RotaryControl) TypedKey(key *fyne.KeyEvent) {
 	if k.Disabled() {
 		return
 	}
@@ -352,24 +356,24 @@ func (k *RotatingKnob) TypedKey(key *fyne.KeyEvent) {
 }
 
 // MouseIn handles mouse enter events
-func (k *RotatingKnob) MouseIn(_ *desktop.MouseEvent) {
+func (k *RotaryControl) MouseIn(_ *desktop.MouseEvent) {
 	k.hovered = true
 	k.Refresh()
 }
 
 // MouseMoved handles mouse move events
-func (k *RotatingKnob) MouseMoved(_ *desktop.MouseEvent) {
+func (k *RotaryControl) MouseMoved(_ *desktop.MouseEvent) {
 	// Visual feedback could be added here
 }
 
 // MouseOut handles mouse exit events
-func (k *RotatingKnob) MouseOut() {
+func (k *RotaryControl) MouseOut() {
 	k.hovered = false
 	k.Refresh()
 }
 
 // Scrolled handles scroll wheel events for adjusting the value
-func (k *RotatingKnob) Scrolled(e *fyne.ScrollEvent) {
+func (k *RotaryControl) Scrolled(e *fyne.ScrollEvent) {
 	if k.Disabled() {
 		return
 	}
@@ -392,7 +396,7 @@ func (k *RotatingKnob) Scrolled(e *fyne.ScrollEvent) {
 }
 
 // getAngleFromPoint calculates the angle in degrees from a point relative to the knob center
-func (k *RotatingKnob) getAngleFromPoint(pos fyne.Position) float64 {
+func (k *RotaryControl) getAngleFromPoint(pos fyne.Position) float64 {
 	size := k.Size()
 	centerX := size.Width / 2
 	centerY := size.Height / 2
@@ -416,7 +420,7 @@ func (k *RotatingKnob) getAngleFromPoint(pos fyne.Position) float64 {
 }
 
 // updateValueFromAngle updates the knob value based on an angle
-func (k *RotatingKnob) updateValueFromAngle(angle float64) {
+func (k *RotaryControl) updateValueFromAngle(angle float64) {
 	// Normalize start and end angles
 	startAngle := k.StartAngle
 	endAngle := k.EndAngle
@@ -473,9 +477,9 @@ func (k *RotatingKnob) updateValueFromAngle(angle float64) {
 	k.SetValue(value)
 }
 
-// rotatingKnobRenderer is the renderer for RotatingKnob
-type rotatingKnobRenderer struct {
-	knob      *RotatingKnob
+// rotaryControlRenderer is the renderer for RotaryControl
+type rotaryControlRenderer struct {
+	knob      *RotaryControl
 	wedge     *canvas.Arc
 	track     *canvas.Arc
 	active    *canvas.Arc
@@ -486,7 +490,7 @@ type rotatingKnobRenderer struct {
 	objects   []fyne.CanvasObject
 }
 
-func (r *rotatingKnobRenderer) Layout(size fyne.Size) {
+func (r *rotaryControlRenderer) Layout(size fyne.Size) {
 	diameter := fyne.Min(size.Width, size.Height)
 	centerX := size.Width / 2
 	centerY := size.Height / 2
@@ -588,12 +592,12 @@ func (r *rotatingKnobRenderer) Layout(size fyne.Size) {
 	}
 }
 
-func (r *rotatingKnobRenderer) MinSize() fyne.Size {
+func (r *rotaryControlRenderer) MinSize() fyne.Size {
 	// Minimum reasonable size for a knob
 	return fyne.NewSize(60, 60)
 }
 
-func (r *rotatingKnobRenderer) Refresh() {
+func (r *rotaryControlRenderer) Refresh() {
 	// Update colors based on state
 	if r.knob.Disabled() {
 		if r.wedge != nil {
@@ -650,7 +654,7 @@ func (r *rotatingKnobRenderer) Refresh() {
 		}
 
 		// Indicator line
-	r.indicator.StrokeColor = theme.ForegroundColor()
+		r.indicator.StrokeColor = theme.ForegroundColor()
 		if r.knob.focused {
 			r.indicator.StrokeWidth = 4
 		} else {
@@ -658,10 +662,10 @@ func (r *rotatingKnobRenderer) Refresh() {
 		}
 
 		// Thumb
-	r.thumb.FillColor = activeColor
+		r.thumb.FillColor = activeColor
 
 		// Center dot
-	r.centerDot.FillColor = theme.BackgroundColor()
+		r.centerDot.FillColor = theme.BackgroundColor()
 		r.centerDot.StrokeColor = theme.ShadowColor()
 		r.centerDot.StrokeWidth = 1
 
@@ -675,8 +679,8 @@ func (r *rotatingKnobRenderer) Refresh() {
 	canvas.Refresh(r.knob.super())
 }
 
-func (r *rotatingKnobRenderer) Objects() []fyne.CanvasObject {
+func (r *rotaryControlRenderer) Objects() []fyne.CanvasObject {
 	return r.objects
 }
 
-func (r *rotatingKnobRenderer) Destroy() {}
+func (r *rotaryControlRenderer) Destroy() {}

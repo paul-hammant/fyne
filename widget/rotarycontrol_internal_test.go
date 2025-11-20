@@ -11,9 +11,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestRotatingKnobRenderer_Objects(t *testing.T) {
-	knob := NewRotatingKnob(0, 100)
-	renderer := test.TempWidgetRenderer(t, knob).(*rotatingKnobRenderer)
+func TestRotaryControlRenderer_Objects(t *testing.T) {
+	knob := NewRotaryControl(0, 100)
+	renderer := test.TempWidgetRenderer(t, knob).(*rotaryControlRenderer)
 
 	objects := renderer.Objects()
 
@@ -28,12 +28,12 @@ func TestRotatingKnobRenderer_Objects(t *testing.T) {
 	assert.IsType(t, &canvas.Circle{}, objects[4]) // centerDot
 }
 
-func TestRotatingKnobRenderer_ObjectsWithTicks(t *testing.T) {
-	knob := NewRotatingKnob(0, 100)
+func TestRotaryControlRenderer_ObjectsWithTicks(t *testing.T) {
+	knob := NewRotaryControl(0, 100)
 	knob.ShowTicks = true
 	knob.TickCount = 5
 
-	renderer := test.TempWidgetRenderer(t, knob).(*rotatingKnobRenderer)
+	renderer := test.TempWidgetRenderer(t, knob).(*rotaryControlRenderer)
 	objects := renderer.Objects()
 
 	// Should have 5 base objects + 5 tick marks
@@ -45,20 +45,20 @@ func TestRotatingKnobRenderer_ObjectsWithTicks(t *testing.T) {
 	}
 }
 
-func TestRotatingKnobRenderer_ObjectsWithoutTicks(t *testing.T) {
-	knob := NewRotatingKnob(0, 100)
+func TestRotaryControlRenderer_ObjectsWithoutTicks(t *testing.T) {
+	knob := NewRotaryControl(0, 100)
 	knob.ShowTicks = false
 
-	renderer := test.TempWidgetRenderer(t, knob).(*rotatingKnobRenderer)
+	renderer := test.TempWidgetRenderer(t, knob).(*rotaryControlRenderer)
 	objects := renderer.Objects()
 
 	// Should have only 5 base objects
 	assert.Equal(t, 5, len(objects))
 }
 
-func TestRotatingKnobRenderer_Layout(t *testing.T) {
-	knob := NewRotatingKnob(0, 100)
-	renderer := test.TempWidgetRenderer(t, knob).(*rotatingKnobRenderer)
+func TestRotaryControlRenderer_Layout(t *testing.T) {
+	knob := NewRotaryControl(0, 100)
+	renderer := test.TempWidgetRenderer(t, knob).(*rotaryControlRenderer)
 
 	size := fyne.NewSize(100, 100)
 	renderer.Layout(size)
@@ -71,9 +71,9 @@ func TestRotatingKnobRenderer_Layout(t *testing.T) {
 	assert.Equal(t, renderer.track.Size(), renderer.active.Size())
 }
 
-func TestRotatingKnobRenderer_MinSize(t *testing.T) {
-	knob := NewRotatingKnob(0, 100)
-	renderer := test.TempWidgetRenderer(t, knob).(*rotatingKnobRenderer)
+func TestRotaryControlRenderer_MinSize(t *testing.T) {
+	knob := NewRotaryControl(0, 100)
+	renderer := test.TempWidgetRenderer(t, knob).(*rotaryControlRenderer)
 
 	minSize := renderer.MinSize()
 
@@ -82,20 +82,20 @@ func TestRotatingKnobRenderer_MinSize(t *testing.T) {
 	assert.GreaterOrEqual(t, minSize.Height, float32(60))
 }
 
-func TestRotatingKnobRenderer_Refresh(t *testing.T) {
-	knob := NewRotatingKnob(0, 100)
-	renderer := test.TempWidgetRenderer(t, knob).(*rotatingKnobRenderer)
+func TestRotaryControlRenderer_Refresh(t *testing.T) {
+	knob := NewRotaryControl(0, 100)
+	renderer := test.TempWidgetRenderer(t, knob).(*rotaryControlRenderer)
 
 	// Initial state
 	renderer.Refresh()
 	assert.NotNil(t, renderer.indicator.StrokeColor)
 }
 
-func TestRotatingKnobRenderer_RefreshDisabled(t *testing.T) {
-	knob := NewRotatingKnob(0, 100)
+func TestRotaryControlRenderer_RefreshDisabled(t *testing.T) {
+	knob := NewRotaryControl(0, 100)
 	knob.Disable()
 
-	renderer := test.TempWidgetRenderer(t, knob).(*rotatingKnobRenderer)
+	renderer := test.TempWidgetRenderer(t, knob).(*rotaryControlRenderer)
 	renderer.Refresh()
 
 	// When disabled, colors should be disabled theme color
@@ -103,11 +103,11 @@ func TestRotatingKnobRenderer_RefreshDisabled(t *testing.T) {
 	assert.Equal(t, theme.DisabledColor(), renderer.thumb.FillColor)
 }
 
-func TestRotatingKnobRenderer_RefreshHovered(t *testing.T) {
-	knob := NewRotatingKnob(0, 100)
+func TestRotaryControlRenderer_RefreshHovered(t *testing.T) {
+	knob := NewRotaryControl(0, 100)
 	knob.hovered = true
 
-	renderer := test.TempWidgetRenderer(t, knob).(*rotatingKnobRenderer)
+	renderer := test.TempWidgetRenderer(t, knob).(*rotaryControlRenderer)
 	renderer.Refresh()
 
 	// When hovered, active color should be hover color
@@ -115,22 +115,22 @@ func TestRotatingKnobRenderer_RefreshHovered(t *testing.T) {
 	assert.Equal(t, theme.HoverColor(), renderer.thumb.FillColor)
 }
 
-func TestRotatingKnobRenderer_RefreshFocused(t *testing.T) {
-	knob := NewRotatingKnob(0, 100)
+func TestRotaryControlRenderer_RefreshFocused(t *testing.T) {
+	knob := NewRotaryControl(0, 100)
 	knob.focused = true
 
-	renderer := test.TempWidgetRenderer(t, knob).(*rotatingKnobRenderer)
+	renderer := test.TempWidgetRenderer(t, knob).(*rotaryControlRenderer)
 	renderer.Refresh()
 
 	// When focused, indicator should be thicker
 	assert.Equal(t, float32(4), renderer.indicator.StrokeWidth)
 }
 
-func TestRotatingKnobRenderer_IndicatorPosition(t *testing.T) {
-	knob := NewRotatingKnob(0, 100)
+func TestRotaryControlRenderer_IndicatorPosition(t *testing.T) {
+	knob := NewRotaryControl(0, 100)
 	knob.SetValue(0) // Minimum value
 
-	renderer := test.TempWidgetRenderer(t, knob).(*rotatingKnobRenderer)
+	renderer := test.TempWidgetRenderer(t, knob).(*rotaryControlRenderer)
 	size := fyne.NewSize(100, 100)
 	renderer.Layout(size)
 
@@ -144,9 +144,9 @@ func TestRotatingKnobRenderer_IndicatorPosition(t *testing.T) {
 	assert.NotEqual(t, centerX, renderer.indicator.Position2.X)
 }
 
-func TestRotatingKnobRenderer_IndicatorRotation(t *testing.T) {
-	knob := NewRotatingKnob(0, 100)
-	renderer := test.TempWidgetRenderer(t, knob).(*rotatingKnobRenderer)
+func TestRotaryControlRenderer_IndicatorRotation(t *testing.T) {
+	knob := NewRotaryControl(0, 100)
+	renderer := test.TempWidgetRenderer(t, knob).(*rotaryControlRenderer)
 	size := fyne.NewSize(100, 100)
 
 	// Set to min value
@@ -163,9 +163,9 @@ func TestRotatingKnobRenderer_IndicatorRotation(t *testing.T) {
 	assert.NotEqual(t, minPos, maxPos)
 }
 
-func TestRotatingKnobRenderer_ThumbSize(t *testing.T) {
-	knob := NewRotatingKnob(0, 100)
-	renderer := test.TempWidgetRenderer(t, knob).(*rotatingKnobRenderer)
+func TestRotaryControlRenderer_ThumbSize(t *testing.T) {
+	knob := NewRotaryControl(0, 100)
+	renderer := test.TempWidgetRenderer(t, knob).(*rotaryControlRenderer)
 	size := fyne.NewSize(100, 100)
 
 	// Normal state
@@ -183,12 +183,12 @@ func TestRotatingKnobRenderer_ThumbSize(t *testing.T) {
 	assert.Greater(t, hoveredSize.Height, normalSize.Height)
 }
 
-func TestRotatingKnobRenderer_TickPositions(t *testing.T) {
-	knob := NewRotatingKnob(0, 100)
+func TestRotaryControlRenderer_TickPositions(t *testing.T) {
+	knob := NewRotaryControl(0, 100)
 	knob.ShowTicks = true
 	knob.TickCount = 5
 
-	renderer := test.TempWidgetRenderer(t, knob).(*rotatingKnobRenderer)
+	renderer := test.TempWidgetRenderer(t, knob).(*rotaryControlRenderer)
 	size := fyne.NewSize(100, 100)
 	renderer.Layout(size)
 
@@ -203,9 +203,9 @@ func TestRotatingKnobRenderer_TickPositions(t *testing.T) {
 	}
 }
 
-func TestRotatingKnobRenderer_Destroy(t *testing.T) {
-	knob := NewRotatingKnob(0, 100)
-	renderer := test.TempWidgetRenderer(t, knob).(*rotatingKnobRenderer)
+func TestRotaryControlRenderer_Destroy(t *testing.T) {
+	knob := NewRotaryControl(0, 100)
+	renderer := test.TempWidgetRenderer(t, knob).(*rotaryControlRenderer)
 
 	// Should not panic
 	assert.NotPanics(t, func() {
@@ -213,8 +213,8 @@ func TestRotatingKnobRenderer_Destroy(t *testing.T) {
 	})
 }
 
-func TestRotatingKnob_GetAngleFromPoint(t *testing.T) {
-	knob := NewRotatingKnob(0, 100)
+func TestRotaryControl_GetAngleFromPoint(t *testing.T) {
+	knob := NewRotaryControl(0, 100)
 	knob.Resize(fyne.NewSize(100, 100))
 
 	// Point at top (north) should be around 0°
@@ -235,10 +235,10 @@ func TestRotatingKnob_GetAngleFromPoint(t *testing.T) {
 	assert.InDelta(t, 270.0, angle, 10.0)
 }
 
-func TestRotatingKnob_UpdateValueFromAngle(t *testing.T) {
-	knob := NewRotatingKnob(0, 100)
-	knob.StartAngle = 0   // Top
-	knob.EndAngle = 180   // Bottom
+func TestRotaryControl_UpdateValueFromAngle(t *testing.T) {
+	knob := NewRotaryControl(0, 100)
+	knob.StartAngle = 0 // Top
+	knob.EndAngle = 180 // Bottom
 
 	// Angle at start should give min value
 	knob.updateValueFromAngle(0)
@@ -253,8 +253,8 @@ func TestRotatingKnob_UpdateValueFromAngle(t *testing.T) {
 	assert.InDelta(t, 50.0, knob.Value, 1.0)
 }
 
-func TestRotatingKnob_UpdateValueFromAngleWrapping(t *testing.T) {
-	knob := NewRotatingKnob(0, 100)
+func TestRotaryControl_UpdateValueFromAngleWrapping(t *testing.T) {
+	knob := NewRotaryControl(0, 100)
 	knob.Wrapping = true
 	knob.StartAngle = 0
 	knob.EndAngle = 180
@@ -265,9 +265,9 @@ func TestRotatingKnob_UpdateValueFromAngleWrapping(t *testing.T) {
 	assert.LessOrEqual(t, knob.Value, 100.0)
 }
 
-func TestRotatingKnob_ColorConsistency(t *testing.T) {
-	knob := NewRotatingKnob(0, 100)
-	renderer := test.TempWidgetRenderer(t, knob).(*rotatingKnobRenderer)
+func TestRotaryControl_ColorConsistency(t *testing.T) {
+	knob := NewRotaryControl(0, 100)
+	renderer := test.TempWidgetRenderer(t, knob).(*rotaryControlRenderer)
 
 	// Check colors are set properly
 	renderer.Refresh()
@@ -282,9 +282,9 @@ func TestRotatingKnob_ColorConsistency(t *testing.T) {
 	assert.Equal(t, theme.ForegroundColor(), renderer.indicator.StrokeColor)
 }
 
-func TestRotatingKnob_RectangularSize(t *testing.T) {
-	knob := NewRotatingKnob(0, 100)
-	renderer := test.TempWidgetRenderer(t, knob).(*rotatingKnobRenderer)
+func TestRotaryControl_RectangularSize(t *testing.T) {
+	knob := NewRotaryControl(0, 100)
+	renderer := test.TempWidgetRenderer(t, knob).(*rotaryControlRenderer)
 
 	// Non-square size
 	size := fyne.NewSize(120, 80)
@@ -296,15 +296,15 @@ func TestRotatingKnob_RectangularSize(t *testing.T) {
 	assert.Equal(t, expectedDiameter, renderer.track.Size().Height)
 }
 
-func TestRotatingKnob_ExtendedRange(t *testing.T) {
-	knob := NewRotatingKnob(0, 1000)
+func TestRotaryControl_ExtendedRange(t *testing.T) {
+	knob := NewRotaryControl(0, 1000)
 	knob.StartAngle = -180 // Full circle minus a gap
 	knob.EndAngle = 170
 
 	knob.SetValue(500)
 	assert.Equal(t, 500.0, knob.Value)
 
-	renderer := test.TempWidgetRenderer(t, knob).(*rotatingKnobRenderer)
+	renderer := test.TempWidgetRenderer(t, knob).(*rotaryControlRenderer)
 	size := fyne.NewSize(100, 100)
 	renderer.Layout(size)
 

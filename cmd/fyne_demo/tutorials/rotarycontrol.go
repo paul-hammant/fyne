@@ -14,7 +14,7 @@ import (
 )
 
 // makeKnobWithIcon creates a knob with an icon and value display
-func makeKnobWithIcon(knob *widget.RotatingKnob, icon string, valueLabel *widget.Label, accentColor color.Color) fyne.CanvasObject {
+func makeKnobWithIcon(knob *widget.RotaryControl, icon string, valueLabel *widget.Label, accentColor color.Color) fyne.CanvasObject {
 	// Apply custom color if provided
 	if accentColor != nil {
 		knob.AccentColor = accentColor
@@ -39,10 +39,10 @@ func makeKnobWithIcon(knob *widget.RotatingKnob, icon string, valueLabel *widget
 	)
 }
 
-// RotatingKnobScreen demonstrates the rotating knob widget with various configurations
-func RotatingKnobScreen(_ fyne.Window) fyne.CanvasObject {
+// RotaryControlScreen demonstrates the rotary control widget with various configurations
+func RotaryControlScreen(_ fyne.Window) fyne.CanvasObject {
 	// 1. BASIC KNOB - Simple percentage control
-	basicKnob := widget.NewRotatingKnob(0, 100)
+	basicKnob := widget.NewRotaryControl(0, 100)
 	basicKnob.SetValue(50)
 	basicKnob.AccentColor = color.NRGBA{R: 100, G: 149, B: 237, A: 255} // Cornflower blue
 	basicValueLabel := widget.NewLabel("50%")
@@ -59,15 +59,15 @@ func RotatingKnobScreen(_ fyne.Window) fyne.CanvasObject {
 		container.NewCenter(basicDisplay))
 
 	// 2. TEMPERATURE CONTROL - Blue/Red gradient feel
-	tempKnob := widget.NewRotatingKnob(-20, 40)
+	tempKnob := widget.NewRotaryControl(-20, 40)
 	tempKnob.SetValue(20)
 	tempKnob.Step = 0.5
 	tempKnob.StartAngle = -180 // Left (9 o'clock)
-	tempKnob.EndAngle = 90      // Right (3 o'clock) - three-quarter circle
+	tempKnob.EndAngle = 90     // Right (3 o'clock) - three-quarter circle
 	tempKnob.TickCount = 13
 	// Use blue-to-red color based on temperature
 	tempKnob.AccentColor = color.NRGBA{R: 255, G: 69, B: 0, A: 255} // Red-Orange for warmth
-	tempKnob.TrackColor = color.NRGBA{R: 70, G: 130, B: 180, A: 80}  // Steel blue (faded)
+	tempKnob.TrackColor = color.NRGBA{R: 70, G: 130, B: 180, A: 80} // Steel blue (faded)
 
 	tempValueLabel := widget.NewLabel("20.0°C")
 	tempValueLabel.TextStyle = fyne.TextStyle{Bold: true}
@@ -94,12 +94,12 @@ func RotatingKnobScreen(_ fyne.Window) fyne.CanvasObject {
 		container.NewCenter(tempDisplay))
 
 	// 3. VOLUME CONTROL - Goes to 11! (Spinal Tap reference)
-	volumeKnob := widget.NewRotatingKnob(0, 11)
+	volumeKnob := widget.NewRotaryControl(0, 11)
 	volumeKnob.SetValue(11)
 	volumeKnob.StartAngle = -90 // Bottom (6 o'clock)
 	volumeKnob.EndAngle = 90    // Top (12 o'clock) - half circle
 	volumeKnob.Step = 1
-	volumeKnob.TickCount = 12 // 0-11
+	volumeKnob.TickCount = 12                                          // 0-11
 	volumeKnob.AccentColor = color.NRGBA{R: 50, G: 205, B: 50, A: 255} // Lime green
 	volumeKnob.TrackColor = color.NRGBA{R: 50, G: 205, B: 50, A: 60}   // Semi-transparent green for full range
 	volumeKnob.ShowTicks = true
@@ -129,12 +129,12 @@ func RotatingKnobScreen(_ fyne.Window) fyne.CanvasObject {
 		container.NewCenter(volumeDisplay))
 
 	// 4. ANGLE SELECTOR - Compass style
-	angleKnob := widget.NewRotatingKnob(0, 359)
+	angleKnob := widget.NewRotaryControl(0, 359)
 	angleKnob.SetValue(0)
 	angleKnob.Wrapping = true
 	angleKnob.StartAngle = 0
 	angleKnob.EndAngle = 359
-	angleKnob.TickCount = 8 // N, NE, E, SE, S, SW, W, NW
+	angleKnob.TickCount = 8                                            // N, NE, E, SE, S, SW, W, NW
 	angleKnob.AccentColor = color.NRGBA{R: 138, G: 43, B: 226, A: 255} // Blue-violet
 
 	angleValueLabel := widget.NewLabel("0° N")
@@ -154,7 +154,7 @@ func RotatingKnobScreen(_ fyne.Window) fyne.CanvasObject {
 	// 5. DATA BINDING - Purple with sync icon
 	boundData := binding.NewFloat()
 	boundData.Set(25.0)
-	boundKnob := widget.NewRotatingKnobWithData(0, 100, boundData)
+	boundKnob := widget.NewRotaryControlWithData(0, 100, boundData)
 	boundKnob.AccentColor = color.NRGBA{R: 147, G: 112, B: 219, A: 255} // Medium purple
 
 	boundValueLabel := widget.NewLabel("25")
@@ -192,7 +192,7 @@ func RotatingKnobScreen(_ fyne.Window) fyne.CanvasObject {
 		container.NewCenter(boundDisplay))
 
 	// 6. DISABLED STATE - Gray with lock icon
-	disabledKnob := widget.NewRotatingKnob(0, 100)
+	disabledKnob := widget.NewRotaryControl(0, 100)
 	disabledKnob.SetValue(75)
 	disabledKnob.Disable()
 
@@ -228,11 +228,11 @@ func RotatingKnobScreen(_ fyne.Window) fyne.CanvasObject {
 		))
 
 	// 7. FINE CONTROL - Cyan, no ticks, precision dial
-	fineKnob := widget.NewRotatingKnob(0, 1)
+	fineKnob := widget.NewRotaryControl(0, 1)
 	fineKnob.SetValue(0.5)
 	fineKnob.Step = 0.001
-	fineKnob.StartAngle = -45  // Lower right
-	fineKnob.EndAngle = 225     // Lower left - 270° sweep
+	fineKnob.StartAngle = -45 // Lower right
+	fineKnob.EndAngle = 225   // Lower left - 270° sweep
 	fineKnob.ShowTicks = false
 	fineKnob.AccentColor = color.NRGBA{R: 0, G: 206, B: 209, A: 255} // Dark turquoise
 
@@ -250,7 +250,7 @@ func RotatingKnobScreen(_ fyne.Window) fyne.CanvasObject {
 		container.NewCenter(fineDisplay))
 
 	// 8. INTERACTIVE TEST PANEL - Rainbow colors
-	testKnob := widget.NewRotatingKnob(0, 100)
+	testKnob := widget.NewRotaryControl(0, 100)
 	testKnob.SetValue(50)
 
 	testValueLabel := widget.NewLabel("50")
@@ -392,7 +392,7 @@ func RotatingKnobScreen(_ fyne.Window) fyne.CanvasObject {
 // getCompassDirection returns the compass direction for a given angle
 func getCompassDirection(angle float64) string {
 	directions := []string{"N", "NE", "E", "SE", "S", "SW", "W", "NW"}
-	index := int((angle + 22.5) / 45) % 8
+	index := int((angle+22.5)/45) % 8
 	return directions[index]
 }
 
@@ -429,12 +429,12 @@ func mod(x, y float64) float64 {
 	return x - y*float64(int(x/y))
 }
 
-// RotatingKnobTitle returns the title for the rotating knob tutorial
-func RotatingKnobTitle() string {
-	return "Rotating Knob"
+// RotaryControlTitle returns the title for the rotary control tutorial
+func RotaryControlTitle() string {
+	return "Rotary Control"
 }
 
-// RotatingKnobDescription returns the description for the rotating knob tutorial
-func RotatingKnobDescription() string {
+// RotaryControlDescription returns the description for the rotary control tutorial
+func RotaryControlDescription() string {
 	return "Circular dial/knob control for value selection with rich visual customization"
 }
