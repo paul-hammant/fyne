@@ -435,11 +435,16 @@ func (k *RotatingKnob) updateValueFromAngle(angle float64) {
 	// If we're wrapping, the angle is always valid
 	// Otherwise, clamp to the sweep range
 	if !k.Wrapping && relativeAngle > sweep {
-		// Determine if we're closer to start or end
-		if relativeAngle > 180 && relativeAngle > sweep {
-			relativeAngle = 0
+		// We're in the dead zone - determine which end is closer
+		deadZone := 360 - sweep
+		distanceIntoDeadZone := relativeAngle - sweep
+
+		// If we're in the first half of the dead zone, we're closer to the end
+		// If we're in the second half, we're closer to the start
+		if distanceIntoDeadZone < deadZone/2 {
+			relativeAngle = sweep // Clamp to max
 		} else {
-			relativeAngle = sweep
+			relativeAngle = 0 // Clamp to min
 		}
 	}
 

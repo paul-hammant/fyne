@@ -103,7 +103,6 @@ func RotatingKnobScreen(_ fyne.Window) fyne.CanvasObject {
 	volumeValueLabel := widget.NewLabel("5")
 	volumeValueLabel.TextStyle = fyne.TextStyle{Bold: true, Italic: false}
 	volumeValueLabel.Alignment = fyne.TextAlignCenter
-	volumeValueLabel.TextSize = 20
 
 	// Create a special "11" indicator
 	volume11Label := widget.NewLabel("")
@@ -267,7 +266,6 @@ func RotatingKnobScreen(_ fyne.Window) fyne.CanvasObject {
 	testValueLabel := widget.NewLabel("50")
 	testValueLabel.TextStyle = fyne.TextStyle{Bold: true}
 	testValueLabel.Alignment = fyne.TextAlignCenter
-	testValueLabel.TextSize = 18
 
 	testEventLog := widget.NewLabel("Events: None")
 	testEventLog.Alignment = fyne.TextAlignCenter
