@@ -65,6 +65,8 @@ type RotatingKnob struct {
 	AccentColor color.Color
 	// TrackColor is the color used for the background track (nil uses theme color)
 	TrackColor color.Color
+	// WedgeColor is the color used for the wedge backdrop fill (nil disables wedge)
+	WedgeColor color.Color
 
 	// OnChanged is called when the value changes (during dragging)
 	OnChanged func(float64)
@@ -199,6 +201,12 @@ func (k *RotatingKnob) CreateRenderer() fyne.WidgetRenderer {
 	// Background circle
 	bg := canvas.NewCircle(theme.ShadowColor())
 
+	// Wedge backdrop (filled arc showing current value range)
+	var wedge *canvas.Arc
+	if k.WedgeColor != nil {
+		wedge = canvas.NewArc(float32(k.StartAngle), float32(k.StartAngle), 0.3, k.WedgeColor)
+	}
+
 	// Track arc (the full range available)
 	track := canvas.NewCircle(theme.DisabledColor())
 
@@ -215,7 +223,11 @@ func (k *RotatingKnob) CreateRenderer() fyne.WidgetRenderer {
 	// Center dot
 	centerDot := canvas.NewCircle(theme.BackgroundColor())
 
-	objects := []fyne.CanvasObject{bg, track, active, indicator, thumb, centerDot}
+	objects := []fyne.CanvasObject{bg}
+	if wedge != nil {
+		objects = append(objects, wedge)
+	}
+	objects = append(objects, track, active, indicator, thumb, centerDot)
 
 	// Add tick marks if enabled
 	var ticks []*canvas.Line
@@ -231,6 +243,7 @@ func (k *RotatingKnob) CreateRenderer() fyne.WidgetRenderer {
 	r := &rotatingKnobRenderer{
 		knob:      k,
 		bg:        bg,
+		wedge:     wedge,
 		track:     track,
 		active:    active,
 		indicator: indicator,
@@ -463,6 +476,7 @@ func (k *RotatingKnob) updateValueFromAngle(angle float64) {
 type rotatingKnobRenderer struct {
 	knob      *RotatingKnob
 	bg        *canvas.Circle
+	wedge     *canvas.Arc
 	track     *canvas.Circle
 	active    *canvas.Circle
 	indicator *canvas.Line
@@ -482,6 +496,25 @@ func (r *rotatingKnobRenderer) Layout(size fyne.Size) {
 	r.bg.Resize(fyne.NewSize(diameter, diameter))
 	r.bg.Move(fyne.NewPos(centerX-radius, centerY-radius))
 
+	// Calculate current angle for wedge
+	ratio := (r.knob.Value - r.knob.Min) / (r.knob.Max - r.knob.Min)
+	startAngle := r.knob.StartAngle
+	endAngle := r.knob.EndAngle
+	sweep := endAngle - startAngle
+	if sweep < 0 {
+		sweep += 360
+	}
+	currentAngle := startAngle + ratio*sweep
+
+	// Wedge backdrop - fills from start angle to current value
+	if r.wedge != nil {
+		wedgeDiameter := diameter * 0.75
+		r.wedge.Resize(fyne.NewSize(wedgeDiameter, wedgeDiameter))
+		r.wedge.Move(fyne.NewPos(centerX, centerY))
+		r.wedge.StartAngle = float32(startAngle)
+		r.wedge.EndAngle = float32(currentAngle)
+	}
+
 	// Track - slightly smaller ring
 	trackDiameter := diameter * 0.85
 	trackRadius := trackDiameter / 2
@@ -491,16 +524,6 @@ func (r *rotatingKnobRenderer) Layout(size fyne.Size) {
 	// Active arc - same size as track, will be styled differently
 	r.active.Resize(fyne.NewSize(trackDiameter, trackDiameter))
 	r.active.Move(fyne.NewPos(centerX-trackRadius, centerY-trackRadius))
-
-	// Calculate indicator position based on current value
-	ratio := (r.knob.Value - r.knob.Min) / (r.knob.Max - r.knob.Min)
-	startAngle := r.knob.StartAngle
-	endAngle := r.knob.EndAngle
-	sweep := endAngle - startAngle
-	if sweep < 0 {
-		sweep += 360
-	}
-	currentAngle := startAngle + ratio*sweep
 
 	// Convert to radians for calculation (0° = top = -90° in standard coords)
 	angleRad := (currentAngle - 90) * math.Pi / 180
@@ -566,6 +589,11 @@ func (r *rotatingKnobRenderer) Refresh() {
 		}
 	} else {
 		r.bg.FillColor = color.NRGBA{R: 0, G: 0, B: 0, A: 20}
+
+		// Wedge backdrop
+		if r.wedge != nil && r.knob.WedgeColor != nil {
+			r.wedge.FillColor = r.knob.WedgeColor
+		}
 
 		// Track shows the full range (subtle)
 		trackColor := theme.DisabledColor()

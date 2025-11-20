@@ -94,11 +94,14 @@ func RotatingKnobScreen(_ fyne.Window) fyne.CanvasObject {
 	// 3. VOLUME CONTROL - Goes to 11! (Spinal Tap reference)
 	volumeKnob := widget.NewRotatingKnob(0, 11)
 	volumeKnob.SetValue(5)
-	volumeKnob.StartAngle = -135
-	volumeKnob.EndAngle = 135
+	volumeKnob.StartAngle = -90  // 270° (left/9 o'clock)
+	volumeKnob.EndAngle = 90     // 90° (right/3 o'clock) - 180° sweep
 	volumeKnob.Step = 0.5
 	volumeKnob.TickCount = 12 // 0-11
-	volumeKnob.AccentColor = color.NRGBA{R: 50, G: 205, B: 50, A: 255} // Lime green
+	volumeKnob.AccentColor = color.NRGBA{R: 50, G: 205, B: 50, A: 255}    // Lime green
+	volumeKnob.WedgeColor = color.NRGBA{R: 50, G: 205, B: 50, A: 60}      // Semi-transparent green wedge
+	volumeKnob.TrackColor = color.NRGBA{R: 80, G: 80, B: 80, A: 40}       // Subtle gray track
+	volumeKnob.ShowTicks = true
 
 	volumeValueLabel := widget.NewLabel("5")
 	volumeValueLabel.TextStyle = fyne.TextStyle{Bold: true, Italic: false}
@@ -113,13 +116,15 @@ func RotatingKnobScreen(_ fyne.Window) fyne.CanvasObject {
 		if value == 11 {
 			volumeValueLabel.SetText("11")
 			volume11Label.SetText("🎸 IT GOES TO ELEVEN! 🎸")
-			volumeKnob.AccentColor = color.NRGBA{R: 255, G: 215, B: 0, A: 255} // Gold for 11!
+			volumeKnob.AccentColor = color.NRGBA{R: 255, G: 215, B: 0, A: 255}    // Gold for 11!
+			volumeKnob.WedgeColor = color.NRGBA{R: 255, G: 215, B: 0, A: 80}      // Gold wedge
 		} else {
 			volumeValueLabel.SetText(fmt.Sprintf("%.0f", value))
 			volume11Label.SetText("")
 			// Green intensity increases with volume
 			intensity := uint8(50 + (value/11)*205)
 			volumeKnob.AccentColor = color.NRGBA{R: 0, G: intensity, B: 0, A: 255}
+			volumeKnob.WedgeColor = color.NRGBA{R: 0, G: intensity, B: 0, A: 60} // Matching wedge
 		}
 		volumeKnob.Refresh()
 	}
