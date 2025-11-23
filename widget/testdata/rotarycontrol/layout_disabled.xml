@@ -1,0 +1,22 @@
+<canvas padded size="120x120">
+	<content>
+		<widget pos="4,4" size="112x112" type="*widget.RotaryControl">
+			<arc cutoutRatio="0.8999999761581421" endAngle="135" pos="8,8" size="95x95" startAngle="-135" strokeColor="disabled" strokeWidth="8"/>
+			<arc cutoutRatio="0.8999999761581421" pos="8,8" size="95x95" startAngle="-135" strokeColor="disabled" strokeWidth="8"/>
+			<line pos="56,28" size="0x28" strokeColor="disabled" strokeWidth="3"/>
+			<circle fillColor="disabled" pos="50,13" size="12x12"/>
+			<circle fillColor="background" pos="48,48" size="16x16" strokeColor="shadow" strokeWidth="1"/>
+			<line pos="18,87" size="5x5" strokeColor="disabled"/>
+			<line pos="5,69" size="7x2" strokeColor="disabled"/>
+			<line pos="3,47" size="8x1" strokeColor="disabled"/>
+			<line pos="12,24" size="6x4" strokeColor="disabled"/>
+			<line pos="31,8" size="3x7" strokeColor="disabled"/>
+			<line pos="56,2" size="0x8" strokeColor="disabled"/>
+			<line pos="76,8" size="3x7" strokeColor="disabled"/>
+			<line pos="92,24" size="6x4" strokeColor="disabled"/>
+			<line pos="100,47" size="8x1" strokeColor="disabled"/>
+			<line pos="98,69" size="7x2" strokeColor="disabled"/>
+			<line pos="87,87" size="5x5" strokeColor="disabled"/>
+		</widget>
+	</content>
+</canvas>

@@ -568,3 +568,30 @@ func TestRotaryControl_DisabledComprehensive(t *testing.T) {
 	knob.Dragged(drag) // Should change from 0 to ~middle value
 	assert.Equal(t, 1, changes)
 }
+
+func TestRotaryControl_Layout(t *testing.T) {
+	test.NewTempApp(t)
+
+	knob := widget.NewRotaryControl(0, 100)
+	knob.Resize(fyne.NewSize(100, 100))
+
+	w := test.NewWindow(knob)
+	defer w.Close()
+	w.Resize(fyne.NewSize(120, 120))
+
+	test.AssertRendersToMarkup(t, "rotarycontrol/layout.xml", w.Canvas())
+}
+
+func TestRotaryControl_LayoutDisabled(t *testing.T) {
+	test.NewTempApp(t)
+
+	knob := widget.NewRotaryControl(0, 100)
+	knob.Resize(fyne.NewSize(100, 100))
+	knob.Disable()
+
+	w := test.NewWindow(knob)
+	defer w.Close()
+	w.Resize(fyne.NewSize(120, 120))
+
+	test.AssertRendersToMarkup(t, "rotarycontrol/layout_disabled.xml", w.Canvas())
+}
