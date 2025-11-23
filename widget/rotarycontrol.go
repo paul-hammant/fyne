@@ -16,6 +16,7 @@ var _ fyne.Widget = (*RotaryControl)(nil)
 var _ fyne.Draggable = (*RotaryControl)(nil)
 var _ fyne.Tappable = (*RotaryControl)(nil)
 var _ fyne.Focusable = (*RotaryControl)(nil)
+var _ fyne.Scrollable = (*RotaryControl)(nil)
 var _ desktop.Hoverable = (*RotaryControl)(nil)
 var _ fyne.Disableable = (*RotaryControl)(nil)
 
@@ -75,9 +76,10 @@ type RotaryControl struct {
 	// OnChangeEnded is called when a value change ends (drag end, key release)
 	OnChangeEnded func(float64)
 
-	binder  basicBinder
-	hovered bool
-	focused bool
+	binder        basicBinder
+	hovered       bool
+	focused       bool
+	pendingChange bool // true if value changed since last OnChangeEnded
 }
 
 // NewRotaryControl creates a new rotary control widget with the specified min and max values.
@@ -156,7 +158,24 @@ func (k *RotaryControl) writeData(data binding.DataItem) {
 	if !ok {
 		return
 	}
-	floatTarget.Set(k.Value)
+	currentValue, err := floatTarget.Get()
+	if err != nil {
+		return
+	}
+	if k.Value != currentValue {
+		floatTarget.Set(k.Value)
+	}
+}
+
+// fireChangeEnded fires OnChangeEnded if there was a pending change
+func (k *RotaryControl) fireChangeEnded() {
+	if !k.pendingChange {
+		return
+	}
+	k.pendingChange = false
+	if k.OnChangeEnded != nil {
+		k.OnChangeEnded(k.Value)
+	}
 }
 
 // SetValue updates the knob value and refreshes the widget
@@ -187,6 +206,7 @@ func (k *RotaryControl) SetValue(value float64) {
 	k.Value = value
 	k.Refresh()
 
+	k.pendingChange = true
 	if k.OnChanged != nil {
 		k.OnChanged(k.Value)
 	}
@@ -274,8 +294,8 @@ func (k *RotaryControl) Dragged(e *fyne.DragEvent) {
 
 // DragEnd is called when dragging ends
 func (k *RotaryControl) DragEnd() {
-	if k.OnChangeEnded != nil {
-		k.OnChangeEnded(k.Value)
+	if !k.Disabled() {
+		k.fireChangeEnded()
 	}
 }
 
@@ -287,22 +307,23 @@ func (k *RotaryControl) Tapped(e *fyne.PointEvent) {
 
 	angle := k.getAngleFromPoint(e.Position)
 	k.updateValueFromAngle(angle)
-
-	if k.OnChangeEnded != nil {
-		k.OnChangeEnded(k.Value)
-	}
+	k.fireChangeEnded()
 }
 
 // FocusGained is called when the knob gains focus
 func (k *RotaryControl) FocusGained() {
 	k.focused = true
-	k.Refresh()
+	if !k.Disabled() {
+		k.Refresh()
+	}
 }
 
 // FocusLost is called when the knob loses focus
 func (k *RotaryControl) FocusLost() {
 	k.focused = false
-	k.Refresh()
+	if !k.Disabled() {
+		k.Refresh()
+	}
 }
 
 // TypedRune handles rune input (not used for knob)
@@ -324,41 +345,31 @@ func (k *RotaryControl) TypedKey(key *fyne.KeyEvent) {
 	switch key.Name {
 	case fyne.KeyUp, fyne.KeyRight:
 		k.SetValue(k.Value + step)
-		if k.OnChangeEnded != nil {
-			k.OnChangeEnded(k.Value)
-		}
+		k.fireChangeEnded()
 	case fyne.KeyDown, fyne.KeyLeft:
 		k.SetValue(k.Value - step)
-		if k.OnChangeEnded != nil {
-			k.OnChangeEnded(k.Value)
-		}
+		k.fireChangeEnded()
 	case fyne.KeyPageUp:
 		k.SetValue(k.Value + step*10)
-		if k.OnChangeEnded != nil {
-			k.OnChangeEnded(k.Value)
-		}
+		k.fireChangeEnded()
 	case fyne.KeyPageDown:
 		k.SetValue(k.Value - step*10)
-		if k.OnChangeEnded != nil {
-			k.OnChangeEnded(k.Value)
-		}
+		k.fireChangeEnded()
 	case fyne.KeyHome:
 		k.SetValue(k.Min)
-		if k.OnChangeEnded != nil {
-			k.OnChangeEnded(k.Value)
-		}
+		k.fireChangeEnded()
 	case fyne.KeyEnd:
 		k.SetValue(k.Max)
-		if k.OnChangeEnded != nil {
-			k.OnChangeEnded(k.Value)
-		}
+		k.fireChangeEnded()
 	}
 }
 
 // MouseIn handles mouse enter events
 func (k *RotaryControl) MouseIn(_ *desktop.MouseEvent) {
 	k.hovered = true
-	k.Refresh()
+	if !k.Disabled() {
+		k.Refresh()
+	}
 }
 
 // MouseMoved handles mouse move events
@@ -369,7 +380,9 @@ func (k *RotaryControl) MouseMoved(_ *desktop.MouseEvent) {
 // MouseOut handles mouse exit events
 func (k *RotaryControl) MouseOut() {
 	k.hovered = false
-	k.Refresh()
+	if !k.Disabled() {
+		k.Refresh()
+	}
 }
 
 // Scrolled handles scroll wheel events for adjusting the value
@@ -390,9 +403,7 @@ func (k *RotaryControl) Scrolled(e *fyne.ScrollEvent) {
 		k.SetValue(k.Value - step)
 	}
 
-	if k.OnChangeEnded != nil {
-		k.OnChangeEnded(k.Value)
-	}
+	k.fireChangeEnded()
 }
 
 // getAngleFromPoint calculates the angle in degrees from a point relative to the knob center
