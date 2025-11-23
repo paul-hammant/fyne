@@ -305,6 +305,10 @@ func (k *RotaryControl) Tapped(e *fyne.PointEvent) {
 		return
 	}
 
+	if !k.focused {
+		focusIfNotMobile(k.super())
+	}
+
 	angle := k.getAngleFromPoint(e.Position)
 	k.updateValueFromAngle(angle)
 	k.fireChangeEnded()
