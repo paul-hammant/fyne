@@ -349,23 +349,21 @@ func (k *RotaryControl) TypedKey(key *fyne.KeyEvent) {
 	switch key.Name {
 	case fyne.KeyUp, fyne.KeyRight:
 		k.SetValue(k.Value + step)
-		k.fireChangeEnded()
 	case fyne.KeyDown, fyne.KeyLeft:
 		k.SetValue(k.Value - step)
-		k.fireChangeEnded()
 	case fyne.KeyPageUp:
 		k.SetValue(k.Value + step*10)
-		k.fireChangeEnded()
 	case fyne.KeyPageDown:
 		k.SetValue(k.Value - step*10)
-		k.fireChangeEnded()
 	case fyne.KeyHome:
 		k.SetValue(k.Min)
-		k.fireChangeEnded()
 	case fyne.KeyEnd:
 		k.SetValue(k.Max)
-		k.fireChangeEnded()
+	default:
+		return // Not a key we handle
 	}
+
+	k.fireChangeEnded()
 }
 
 // MouseIn handles mouse enter events
@@ -405,6 +403,8 @@ func (k *RotaryControl) Scrolled(e *fyne.ScrollEvent) {
 		k.SetValue(k.Value + step)
 	} else if e.Scrolled.DY < 0 {
 		k.SetValue(k.Value - step)
+	} else {
+		return
 	}
 
 	k.fireChangeEnded()

@@ -346,7 +346,9 @@ func TestSlider_Focus(t *testing.T) {
 
 func TestSlider_Disabled(t *testing.T) {
 	slider := NewSlider(0, 5)
+	assert.False(t, slider.Disabled())
 	slider.Disable()
+	assert.True(t, slider.Disabled())
 
 	changes := 0
 	slider.OnChanged = func(_ float64) {

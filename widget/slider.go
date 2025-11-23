@@ -23,7 +23,7 @@ var (
 
 // Slider is a widget that can slide between two fixed values.
 type Slider struct {
-	BaseWidget
+	DisableableWidget
 
 	Value float64
 	Min   float64
@@ -39,7 +39,6 @@ type Slider struct {
 	binder        basicBinder
 	hovered       bool
 	focused       bool
-	disabled      bool // don't use DisableableWidget so we can put Since comments on funcs
 	pendingChange bool // true if value changed since last OnChangeEnded
 }
 
@@ -82,14 +81,14 @@ func (s *Slider) Bind(data binding.Float) {
 
 // DragEnd is called when the drag ends.
 func (s *Slider) DragEnd() {
-	if !s.disabled {
+	if !s.Disabled() {
 		s.fireChangeEnded()
 	}
 }
 
 // Dragged is called when a drag event occurs.
 func (s *Slider) Dragged(e *fyne.DragEvent) {
-	if s.disabled {
+	if s.Disabled() {
 		return
 	}
 	ratio := s.getRatio(&e.PointEvent)
@@ -103,7 +102,7 @@ func (s *Slider) Dragged(e *fyne.DragEvent) {
 //
 // Since: 2.4
 func (s *Slider) Tapped(e *fyne.PointEvent) {
-	if s.disabled {
+	if s.Disabled() {
 		return
 	}
 
@@ -147,7 +146,7 @@ func (s *Slider) fireChangeEnded() {
 // Since: 2.4
 func (s *Slider) FocusGained() {
 	s.focused = true
-	if !s.disabled {
+	if !s.Disabled() {
 		s.Refresh()
 	}
 }
@@ -157,7 +156,7 @@ func (s *Slider) FocusGained() {
 // Since: 2.4
 func (s *Slider) FocusLost() {
 	s.focused = false
-	if !s.disabled {
+	if !s.Disabled() {
 		s.Refresh()
 	}
 }
@@ -167,7 +166,7 @@ func (s *Slider) FocusLost() {
 // Since: 2.4
 func (s *Slider) MouseIn(_ *desktop.MouseEvent) {
 	s.hovered = true
-	if !s.disabled {
+	if !s.Disabled() {
 		s.Refresh()
 	}
 }
@@ -183,7 +182,7 @@ func (s *Slider) MouseMoved(_ *desktop.MouseEvent) {
 // Since: 2.4
 func (s *Slider) MouseOut() {
 	s.hovered = false
-	if !s.disabled {
+	if !s.Disabled() {
 		s.Refresh()
 	}
 }
@@ -192,7 +191,7 @@ func (s *Slider) MouseOut() {
 //
 // Since: 2.4
 func (s *Slider) TypedKey(key *fyne.KeyEvent) {
-	if s.disabled {
+	if s.Disabled() {
 		return
 	}
 	if s.Orientation == Vertical {
@@ -319,33 +318,6 @@ func (s *Slider) MinSize() fyne.Size {
 	return s.BaseWidget.MinSize()
 }
 
-// Disable disables the slider
-//
-// Since: 2.5
-func (s *Slider) Disable() {
-	if !s.disabled {
-		defer s.Refresh()
-	}
-	s.disabled = true
-}
-
-// Enable enables the slider
-//
-// Since: 2.5
-func (s *Slider) Enable() {
-	if s.disabled {
-		defer s.Refresh()
-	}
-	s.disabled = false
-}
-
-// Disabled returns true if the slider is currently disabled
-//
-// Since: 2.5
-func (s *Slider) Disabled() bool {
-	return s.disabled
-}
-
 // CreateRenderer links this widget to its renderer.
 func (s *Slider) CreateRenderer() fyne.WidgetRenderer {
 	s.ExtendBaseWidget(s)
@@ -432,16 +404,16 @@ func (s *sliderRenderer) Refresh() {
 	v := fyne.CurrentApp().Settings().ThemeVariant()
 
 	s.track.FillColor = th.Color(theme.ColorNameInputBackground, v)
-	if s.slider.disabled {
+	if s.slider.Disabled() {
 		s.thumb.FillColor = th.Color(theme.ColorNameDisabled, v)
 	} else {
 		s.thumb.FillColor = th.Color(theme.ColorNameForeground, v)
 	}
 	s.active.FillColor = s.thumb.FillColor
 
-	if s.slider.focused && !s.slider.disabled {
+	if s.slider.focused && !s.slider.Disabled() {
 		s.focusIndicator.FillColor = th.Color(theme.ColorNameFocus, v)
-	} else if s.slider.hovered && !s.slider.disabled {
+	} else if s.slider.hovered && !s.slider.Disabled() {
 		s.focusIndicator.FillColor = th.Color(theme.ColorNameHover, v)
 	} else {
 		s.focusIndicator.FillColor = color.Transparent
