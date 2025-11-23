@@ -62,22 +62,6 @@ func TestRotaryControl_SetValueWrapping(t *testing.T) {
 	assert.Equal(t, 10.0, knob.Value)
 }
 
-func TestRotaryControl_OnChanged(t *testing.T) {
-	knob := widget.NewRotaryControl(0, 100)
-
-	var changedValue float64
-	changedCalled := false
-	knob.OnChanged = func(value float64) {
-		changedValue = value
-		changedCalled = true
-	}
-
-	knob.SetValue(75)
-
-	assert.True(t, changedCalled)
-	assert.Equal(t, 75.0, changedValue)
-}
-
 func TestRotaryControl_OnChangeEnded(t *testing.T) {
 	knob := widget.NewRotaryControl(0, 100)
 
@@ -407,9 +391,9 @@ func TestRotaryControl_OnChangedComprehensive(t *testing.T) {
 
 	assert.Equal(t, 0, changes)
 
-	// SetValue should NOT trigger OnChanged (matches Slider behavior)
+	// SetValue should trigger OnChanged
 	knob.SetValue(25)
-	assert.Equal(t, 1, changes) // Note: RotaryControl calls OnChanged on SetValue
+	assert.Equal(t, 1, changes)
 
 	// Drag should trigger OnChanged
 	drag := &fyne.DragEvent{}
@@ -435,6 +419,10 @@ func TestRotaryControl_OnChangedComprehensive(t *testing.T) {
 	// Key should trigger
 	knob.TypedKey(&fyne.KeyEvent{Name: fyne.KeyRight})
 	assert.Equal(t, 5, changes)
+
+	// Scroll should trigger
+	knob.Scrolled(&fyne.ScrollEvent{Scrolled: fyne.NewDelta(0, 1)})
+	assert.Equal(t, 6, changes)
 }
 
 func TestRotaryControl_OnChangeEndedComprehensive(t *testing.T) {
